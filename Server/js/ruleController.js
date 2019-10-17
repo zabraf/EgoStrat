@@ -1,3 +1,7 @@
+let Tile = require('./tile');
+let Piece = require('./piece');
+let Player = require('./player');
+
 const color = {
     BLUE: 'blue',
     RED: 'red',
@@ -33,7 +37,7 @@ const DEFAULT_SET = {
     'BOMB': 6,
 }
 
-class RuleController {
+module.exports = class RuleController {
 
     /**
      * 
@@ -44,7 +48,7 @@ class RuleController {
      * @param {Array<GameSet>} aListOfPieces 'PieceName' : nbPieces 
      */
     constructor(aPlayer1Username = "P1", aPlayer2Username = "P2", Width = 10, Height = 10, aListOfPieces = DEFAULT_SET) {
-        movablePieces = aListOfPieces['CAPTAIN'] +
+        var movablePieces = aListOfPieces['CAPTAIN'] +
             aListOfPieces['COLONEL'] +
             aListOfPieces['GENERAL'] +
             aListOfPieces['LIEUTENANT'] +
@@ -61,30 +65,29 @@ class RuleController {
         this.player1 = new Player(aPlayer1Username, color.RED, movablePieces);
         this.player2 = new Player(aPlayer2Username, color.BLUE, movablePieces);
 
-        this.map = [];
 
         this.Width = Width;
         this.Height = Height;
+        
+        this.map = new Array(Width);
+        for (let i = 0; i < Width; i++) {
+            this.map[i] = new Array(Height);            
+        }
+
         var WidthDivided = 100 / Width
         var HeightDivided = 100 / Height
         for (var i = 0; i < Width; i++) {
             for (var j = 0; j < Height; j++) {
-                if (WidthDivided * i == 20 || WidthDivided * i == 30 || WidthDivided * i == 60 || WidthDivided * i == 70 && HeightDivided * j == 40 || HeightDividedgit * j == 50) {
-                    map[i][j] = new tile(false);
+                if (WidthDivided * i == 20 || WidthDivided * i == 30 || WidthDivided * i == 60 || WidthDivided * i == 70 && HeightDivided * j == 40 || HeightDivided * j == 50) {
+                    this.map[i][j] = new Tile(i,j,false);
+                }else{
+                    this.map[i][j] = new Tile(i,j);
                 }
-                map[i][j] = new tile();
             }
         }
         
     }
     MovePiece(tileDeparture, tileArrival) {
-<<<<<<< HEAD
-        var result = false;
-
-
-
-        return result;
-=======
         
         if(tileArrival.piece != null){
             if(tileArrival.piece.player === tileDeparture.piece.player){
@@ -98,7 +101,6 @@ class RuleController {
             tileDeparture.piece = null;
         }
         
->>>>>>> 2b1eeeb0d3ab1ec0c3949c4d385629c105e985c7
     }
     Fight(piece1, piece2) {
         var result = piece1;
@@ -177,13 +179,13 @@ class RuleController {
         return remainingOpponent <= 0 || this.piecesPlayer1['FLAG'] == 0;
     }
     DrawMap() {
-        for (var i = 0; i < Width; i++) {
-            for (var j = 0; j < Height; i++) {
-                map[i][j].DrawTile();
+        var drawedMap = "";
+        for (var i = 0; i < this.Width; i++) {
+            for (var j = 0; j < this.Height; j++) {
+                drawedMap += this.map[i][j].DrawTile();
             }
-
         }
-
+        return drawedMap;
     }
     WherePieceCanGo(tileDeparture) {
         var canGoTopY = false;

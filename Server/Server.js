@@ -1,19 +1,21 @@
+let RuleController = require('./js/ruleController');
 let http = require('http');
 let fs = require('fs');
+
+const port = 30000;
+const hostname = "10.5.51.39";
  
+
 let handleRequest = (request, response) => {
     response.writeHead(200, {
         'Content-Type': 'text/html'
     });
-     fs.readFile('./Client/index.html', null, function (error, data) {
-        if (error) {
-            response.writeHead(404);
-            response.write('Whoops! File not found!');
-        } else {
-            response.write(data);
-        }
-        response.end();
-    });
+    var ruleController = new RuleController();
+    var dt = new Date();
+    response.write(ruleController.DrawMap());
+    response.end();
+
 };
 
-http.createServer(handleRequest).listen(80);
+http.createServer(handleRequest).listen(port,hostname);
+

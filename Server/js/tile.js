@@ -1,4 +1,4 @@
-class Tile{
+module.exports = class Tile{
     constructor(anX,anY,canGo = true,aPiece = null){
         this.canGo = canGo;
         this.piece = aPiece;
@@ -22,9 +22,9 @@ class Tile{
         var draw = "";
         if (this.canGo) {
             if(this.selected){
-                draw = '<div class="tile go selected">';
+                draw = '<div class="tile go selected">S';
             }else{
-                draw = '<div class="tile go">';
+                draw = '<div class="tile go">F';
             }
            
             if (this.piece != null) {
@@ -32,7 +32,7 @@ class Tile{
             }
         }
         else {
-            draw = '<div class="tile cantgo">';
+            draw = '<div class="tile cantgo">X';
         }
         draw += '</div>';
         return draw;

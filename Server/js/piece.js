@@ -1,4 +1,4 @@
-class Piece{
+module.exports = class Piece{
     constructor(aType,aPlayer){
         this.type = aType;
         this.player = aPlayer;

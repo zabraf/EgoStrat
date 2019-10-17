@@ -1,4 +1,4 @@
-class Player {
+module.exports = class Player {
         constructor(anUsername, aColor, ruleControlleur,anNbMovablePieces) {
                 this.isRacist = Math.floor(Math.random() * 1000) == 1;
                 this.color = aColor;
