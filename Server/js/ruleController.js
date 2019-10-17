@@ -34,14 +34,37 @@ const DEFAULT_SET = {
 }
 
 class RuleController{
-    constructor(Width,Height,aPlayer1,aPlayer2,aListOfPieces = DEFAULT_SET){
-        this.player1 = aPlayer1;
-        this.player2 = aPlayer2;
-        this.piecesPlayer1 = aListOfPieces;
-        this.piecesPlayer2 = aListOfPieces;
+
+    /**
+     * 
+     * @param {string} aPlayer1Username 
+     * @param {string} aPlayer2Username 
+     * @param {number} Width 
+     * @param {number} Height 
+     * @param {Array<GameSet>} aListOfPieces 'PieceName' : nbPieces 
+     */
+    constructor(aPlayer1Username = "P1",aPlayer2Username = "P2",Width = 10,Height = 10,aListOfPieces = DEFAULT_SET){
+        movablePieces = aListOfPieces['CAPTAIN'] +
+        aListOfPieces['COLONEL'] +
+        aListOfPieces['GENERAL'] +
+        aListOfPieces['LIEUTENANT'] +
+        aListOfPieces['MAJOR'] +
+        aListOfPieces['MARSHAL'] +
+        aListOfPieces['MINER'] +
+        aListOfPieces['SCOUT'] +
+        aListOfPieces['SERGEANT'] +
+        aListOfPieces['SPY'];
+
+        if(aPlayer1Username == aPlayer2Username){
+            throw new Exception("Cannot have 2 same username");
+        }
+        this.player1 = new Player(aPlayer1Username,color.RED,movablePieces);
+        this.player2 = new Player(aPlayer2Username,color.BLUE,movablePieces);
+
+        this.map = [];
+
         this.Width = Width;
         this.Height = Height;
-        this.map = 0;
         var WidthDivided = 100 / Width
         var HeightDivided = 100 / Height
         for (var i = 0; i < Width; i++) {
@@ -54,8 +77,10 @@ class RuleController{
 
         }
     }
-    MovePiece(piece, tileDeparture, tileArrival) {
+    MovePiece(tileDeparture, tileArrival) {
         var result = false;
+        
+
 
         return result;
     }
@@ -144,7 +169,7 @@ class RuleController{
         }
 
     }
-    CheckPieceEmplacement(piece, tile) {
+    CheckPieceCanGo(tileDeparture,tileArrival) {
         var result = false;
 
         return result;
