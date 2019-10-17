@@ -34,35 +34,40 @@ const DEFAULT_SET = {
 }
 
 class RuleController{
-    constructor(aMap,aPlayer1,aPlayer2,aListOfPieces = DEFAULT_SET){
-        this.map = aMap;
+    constructor(Width,Height,aPlayer1,aPlayer2,aListOfPieces = DEFAULT_SET){
         this.player1 = aPlayer1;
         this.player2 = aPlayer2;
         this.piecesPlayer1 = aListOfPieces;
         this.piecesPlayer2 = aListOfPieces;
+        this.Width = Width;
+        this.Height = Height;
+        this.map = 0;
+        var WidthDivided = 100 / Width
+        var HeightDivided = 100 / Height
+        for (var i = 0; i < Width; i++) {
+            for (var j = 0; j < Height; j++) {
+                if (WidthDivided * i == 20 || WidthDivided * i == 30 || WidthDivided * i == 60 || WidthDivided * i == 70 &&HeightDivided * j == 40 || HeightDividedgit * j == 50) {
+                    map[i][j] = new tile(false);
+                }
+                map[i][j] = new tile();
+            }
+
+        }
     }
-    MovePiece(piece,tileDeparture,tileArrival){
+    MovePiece(piece, tileDeparture, tileArrival) {
         var result = false;
 
         return result;
     }
-    Die(piece){
-        if (piece.player == this.player1){
-            this.piecesPlayer1[piece.GetType().name] -= 1;
-        }else{
-            this.piecesPlayer2[piece.GetType().name] -= 1;
-        }
-        piece.Die();
-    }
-    Fight(piece1, piece2){
+    Fight(piece1, piece2) {
         var result = piece1;
 
         //Compare the strengths
-        if(piece2.GetType().strength > piece1.GetType().strength){
+        if (piece2.GetType().strength > piece1.GetType().strength) {
             result = piece2;
-        }else if (piece2.GetType().strength < piece1.GetType().strength){
+        } else if (piece2.GetType().strength < piece1.GetType().strength) {
             result = piece1;
-        }else{
+        } else {
             result = null;
 
             this.Die(piece1);
@@ -73,14 +78,14 @@ class RuleController{
         }
 
         //Special cases
-        switch(piece1.GetType()){
+        switch (piece1.GetType()) {
             case type.MINER:
-                    if(piece2.GetType() == type.BOMB){
-                        result = piece1;
-                    }
+                if (piece2.GetType() == type.BOMB) {
+                    result = piece1;
+                }
                 break;
             case type.SPY:
-                if(piece2.GetType() == type.MARSHAL){
+                if (piece2.GetType() == type.MARSHAL) {
                     result = piece1;
                 }
                 break;
@@ -98,31 +103,21 @@ class RuleController{
             default:
                 throw new Exception('Impossible Fight');
                 break;
-            
+
         }
 
-        if(result == piece1){
-            
-            this.Die(piece2);
-            this.CheckWinP1();
-        }else if(result == piece2){
-            this.Die(piece1);
-            this.CheckWinP2();
+        if (result == piece1) {
+            piece2.Die();
+            this.CheckWin(piece1.GetPlayer());
+        } else if (result == piece2) {
+            piece1.Die();
+            this.CheckWin(piece2.GetPlayer());
         }
 
         return result;
     }
-    CheckWinP1(){
-        var remainingOpponent = this.piecesPlayer1['CAPTAIN'] +
-        this.piecesPlayer1['COLONEL'] +
-        this.piecesPlayer1['GENERAL'] +
-        this.piecesPlayer1['LIEUTENANT'] +
-        this.piecesPlayer1['MAJOR'] +
-        this.piecesPlayer1['MARSHAL'] +
-        this.piecesPlayer1['MINER'] +
-        this.piecesPlayer1['SCOUT'] +
-        this.piecesPlayer1['SERGEANT'] +
-        this.piecesPlayer1['SPY'];
+    CheckWin(player) {
+        var result = false;
 
         return remainingOpponent <= 0 || this.piecesPlayer2['FLAG'] == 0;
     }
@@ -140,10 +135,16 @@ class RuleController{
 
         return remainingOpponent <= 0 || this.piecesPlayer1['FLAG'] == 0;
     }
-    DrawMap(){
+    DrawMap() {
+        for (var i = 0; i < Width; i++) {
+            for (var j = 0; j < Height; i++) {
+                map[i][j].DrawTile();
+            }
+
+        }
 
     }
-    CheckPieceEmplacement(piece,tile){
+    CheckPieceEmplacement(piece, tile) {
         var result = false;
 
         return result;
