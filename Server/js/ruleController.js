@@ -74,15 +74,23 @@ class RuleController{
                 }
                 map[i][j] = new tile();
             }
-
         }
+        
     }
     MovePiece(tileDeparture, tileArrival) {
-        var result = false;
         
-
-
-        return result;
+        if(tileArrival.piece != null){
+            if(tileArrival.piece.player === tileDeparture.piece.player){
+                throw new Exception("Oh nooooooon");
+            }else{
+                tileArrival.piece = this.Fight(tileDeparture.piece,tileArrival.piece);
+                tileDeparture.piece = null;
+            }
+        }else{
+            tileArrival.piece = tileDeparture.piece;
+            tileDeparture.piece = null;
+        }
+        
     }
     Fight(piece1, piece2) {
         var result = piece1;
