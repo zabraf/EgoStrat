@@ -22,9 +22,9 @@ module.exports = class Tile{
         var draw = "";
         if (this.canGo) {
             if(this.selected){
-                draw = '<div class="tile go selected">S';
+                draw = '<div class="tile go selected">';
             }else{
-                draw = '<div class="tile go">F';
+                draw = '<div class="tile go">';
             }
            
             if (this.piece != null) {
@@ -32,7 +32,7 @@ module.exports = class Tile{
             }
         }
         else {
-            draw = '<div class="tile cantgo">X';
+            draw = '<div class="tile cantgo">';
         }
         draw += '</div>';
         return draw;

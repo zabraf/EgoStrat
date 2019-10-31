@@ -56,23 +56,30 @@ module.exports = class RuleController {
         this.player2 = new Player(aPlayer2Username, color.BLUE,this, aListOfPieces);
 
 
-        this.Width = Width;
-        this.Height = Height;
+        this.Width = 10;
+        this.Height = 10;
         
-        this.map = new Array(Width);
-        for (let i = 0; i < Width; i++) {
-            this.map[i] = new Array(Height);            
+        this.map = new Array( this.Width);
+        for (let i = 0; i <  this.Width; i++) {
+            this.map[i] = new Array( this.Height);            
         }
 
-        var WidthDivided = 100 / Width
-        var HeightDivided = 100 / Height
-        for (var i = 0; i < Width; i++) {
-            for (var j = 0; j < Height; j++) {
-                if (WidthDivided * i == 20 || WidthDivided * i == 30 || WidthDivided * i == 60 || WidthDivided * i == 70 && HeightDivided * j == 40 || HeightDivided * j == 50) {
+        var WidthDivided = 100 /  this.Width
+        var HeightDivided = 100 /  this.Height
+        var WidthD5 = this.Width / 10;
+        var HeightD5 = this.Height / 10;
+        for (var i = 0; i <  this.Width; i++) {
+            for (var j = 0; j <  this.Height; j++) {
+                if(((i >= WidthD5 *2 && i < WidthD5*4) || (i >= WidthD5 * 6 && i < WidthD5*8)) && (j >= HeightD5*4 && j < HeightD5 * 6)) {
                     this.map[i][j] = new Tile(i,j,false);
                 }else{
                     this.map[i][j] = new Tile(i,j);
                 }
+                /*if ((WidthDivided * i >= 40 && WidthDivided * i <= 50)  && (( HeightDivided * j >= 60 &&  HeightDivided * j <= 70) || ( HeightDivided * j >= 20 &&  HeightDivided * j <= 30)) ) {
+                    this.map[i][j] = new Tile(i,j,false);
+                }else{
+                    this.map[i][j] = new Tile(i,j);
+                }*/
             }
         }
         
@@ -175,9 +182,9 @@ module.exports = class RuleController {
      */
     DrawMap() {
         var drawedMap = "";
-        for (var i = 0; i < this.Width; i++) {
+        for (var j = 0; j < this.Height; j++) {
             drawedMap+= "<div class=\"row\">";
-            for (var j = 0; j < this.Height; j++) {
+            for (var i = 0; i < this.Width; i++) {
                 drawedMap += this.map[i][j].DrawTile();
             }
             drawedMap += "</div>";
