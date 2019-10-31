@@ -48,22 +48,12 @@ module.exports = class RuleController {
      * @param {Array<GameSet>} aListOfPieces 'PieceName' : nbPieces 
      */
     constructor(aPlayer1Username = "P1", aPlayer2Username = "P2", Width = 10, Height = 10, aListOfPieces = DEFAULT_SET) {
-        var movablePieces = aListOfPieces['CAPTAIN'] +
-            aListOfPieces['COLONEL'] +
-            aListOfPieces['GENERAL'] +
-            aListOfPieces['LIEUTENANT'] +
-            aListOfPieces['MAJOR'] +
-            aListOfPieces['MARSHAL'] +
-            aListOfPieces['MINER'] +
-            aListOfPieces['SCOUT'] +
-            aListOfPieces['SERGEANT'] +
-            aListOfPieces['SPY'];
-
+        
         if (aPlayer1Username == aPlayer2Username) {
             throw new Exception("Cannot have 2 same username");
         }
-        this.player1 = new Player(aPlayer1Username, color.RED, movablePieces);
-        this.player2 = new Player(aPlayer2Username, color.BLUE, movablePieces);
+        this.player1 = new Player(aPlayer1Username, color.RED,this, aListOfPieces);
+        this.player2 = new Player(aPlayer2Username, color.BLUE,this, aListOfPieces);
 
 
         this.Width = Width;
@@ -87,6 +77,11 @@ module.exports = class RuleController {
         }
         
     }
+    /**
+     * Move piece in tileDeparture to tileArrival
+     * @param {Tile} tileDeparture 
+     * @param {Tile} tileArrival 
+     */
     MovePiece(tileDeparture, tileArrival) {
         
         if(tileArrival.piece != null){
@@ -102,6 +97,11 @@ module.exports = class RuleController {
         }
         
     }
+    /**
+     * Combat deux pieces l'une contre l'autre
+     * @param {Piece} piece1 
+     * @param {Piece} piece2 
+     */
     Fight(piece1, piece2) {
         var result = piece1;
 
@@ -110,14 +110,17 @@ module.exports = class RuleController {
             result = piece2;
         } else if (piece2.GetType().strength < piece1.GetType().strength) {
             result = piece1;
+            if(piece2.GetType() == type.FLAG){
+                piece2.GetPlayer().isAlive = false;
+            }
         } else {
             result = null;
 
             this.Die(piece1);
             this.Die(piece2);
 
-            this.CheckWin(piece1.GetPlayer());
-            this.CheckWin(piece2.GetPlayer());
+            this.CheckWin(this.player1,this.player2);
+            this.CheckWin(this.player2,this.player1);
         }
 
         //Special cases
@@ -151,42 +154,40 @@ module.exports = class RuleController {
 
         if (result == piece1) {
             piece2.Die();
-            this.CheckWin(piece1.GetPlayer());
+            this.CheckWin(piece1.GetPlayer(),piece2.GetPlayer());
         } else if (result == piece2) {
             piece1.Die();
-            this.CheckWin(piece2.GetPlayer());
+            this.CheckWin(piece2.GetPlayer(),piece1.GetPlayer());
         }
 
         return result;
     }
-    CheckWin(player) {
-        var result = false;
-
-        return remainingOpponent <= 0 || this.piecesPlayer2['FLAG'] == 0;
+    /**
+     * Check if player win against opponent
+     * @param {Player} player 
+     * @param {Player} opponent 
+     */
+    CheckWin(player,opponent) {
+        return opponent.GetNBMovablePieces <= 0 || opponent.listOfPieces['FLAG'] <= 0;
     }
-    CheckWinP2() {
-        var remainingOpponent = this.piecesPlayer2['CAPTAIN'] +
-            this.piecesPlayer2['COLONEL'] +
-            this.piecesPlayer2['GENERAL'] +
-            this.piecesPlayer2['LIEUTENANT'] +
-            this.piecesPlayer2['MAJOR'] +
-            this.piecesPlayer2['MARSHAL'] +
-            this.piecesPlayer2['MINER'] +
-            this.piecesPlayer2['SCOUT'] +
-            this.piecesPlayer2['SERGEANT'] +
-            this.piecesPlayer2['SPY'];
-
-        return remainingOpponent <= 0 || this.piecesPlayer1['FLAG'] == 0;
-    }
+    /**
+     * Draw the entire map
+     */
     DrawMap() {
         var drawedMap = "";
         for (var i = 0; i < this.Width; i++) {
+            drawedMap+= "<div class=\"row\">";
             for (var j = 0; j < this.Height; j++) {
                 drawedMap += this.map[i][j].DrawTile();
             }
+            drawedMap += "</div>";
         }
         return drawedMap;
     }
+    /**
+     * Check where piece in tileDeparture can go
+     * @param {Tile} tileDeparture 
+     */
     WherePieceCanGo(tileDeparture) {
         var canGoTopY = false;
         var canGoBotY = false;
@@ -248,6 +249,9 @@ module.exports = class RuleController {
             }
         } while (canGoLeftX)
     }
+    /**
+     * Unselect all tiles in map
+     */
     Unselect()
     {
         map.forEach(mapx => {

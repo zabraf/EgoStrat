@@ -14,7 +14,6 @@ GetPlayer()
 }
 Die()
 {
-
         this.isDead = true;
 }
 GetColor()
