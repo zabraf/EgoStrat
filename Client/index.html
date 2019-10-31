@@ -1,10 +1,77 @@
 <!DOCTYPE html>
 <html>
     <head>
-            <link rel="stylesheet" type="text/css" href="./css/style.css"/>
+        <style>
+            div {
+                vertical-align: top;
+            }
+            #map, #player1Info, #player2Info{
+                display: inline-block;
+            }
+            .tile {
+                width: 50px;
+                height: 50px;
+                display: inline-block;
+                border:1px solid black;
+            }
+            .go {
+                background-color: green;
+            }
+            .cantgo {
+                background-color: red;
+            }
+             .go:hover{
+                 cursor: pointer;
+                background-color: greenyellow;
+            }
+            .go:active{
+                border-width: 2px;
+                width: 48px;
+                height: 48px;
+                background-color: #75c200;
+            }
+            .selected {
+                background-color: yellow;
+            }
+        </style>
     </head>
     <body>
         <div id="map">
+            { map }
+        </div>
+        <div id="player1Info">
+                <div id="name1">{username1}</div>
+                <div id="pieces1">
+                        <div id="MARSHAL1">Remaning {MARSHAL1} MARSHAL</div>
+                        <div id="GENERAL1">Remaning {GENERAL1} GENERAL</div>
+                        <div id="COLONEL1">Remaning {COLONEL1} COLONEL</div>
+                        <div id="MAJOR1">Remaning {MAJOR1} MAJOR</div>
+                        <div id="CAPTAIN1">Remaning {CAPTAIN1} CAPTAIN</div>
+                        <div id="LIEUTENANT1">Remaning {LIEUTENANT1} LIEUTENANT</div>
+                        <div id="SERGEANT1">Remaning {SERGEANT1} SERGEANT</div>
+                        <div id="MINER1">Remaning {MINER1} MINER</div>
+                        <div id="SCOUT1">Remaning {SCOUT1} SCOUT</div>
+                        <div id="SPY1">Remaning {SPY1} SPY</div>
+                        <div id="FLAG1">Remaning {FLAG1} FLAG</div>
+                        <div id="BOMB1">Remaning {BOMB1} BOMB</div>
+                </div>
+        </div>
+        <div id="player2Info">
+                <div id="name2">{username2}</div>
+                <div id="pieces2">
+                        <div id="MARSHAL2">Remaning {MARSHAL2} MARSHAL</div>
+                        <div id="GENERAL2">Remaning {GENERAL2} GENERAL</div>
+                        <div id="COLONEL2">Remaning {COLONEL2} COLONEL</div>
+                        <div id="MAJOR2">Remaning {MAJOR2} MAJOR</div>
+                        <div id="CAPTAIN2">Remaning {CAPTAIN2} CAPTAIN</div>
+                        <div id="LIEUTENANT2">Remaning {LIEUTENANT2} LIEUTENANT</div>
+                        <div id="SERGEANT2">Remaning {SERGEANT2} SERGEANT</div>
+                        <div id="MINER2">Remaning {MINER2} MINER</div>
+                        <div id="SCOUT2">Remaning {SCOUT2} SCOUT</div>
+                        <div id="SPY2">Remaning {SPY2} SPY</div>
+                        <div id="FLAG2">Remaning {FLAG2} FLAG</div>
+                        <div id="BOMB2">Remaning {BOMB2} BOMB</div>
+                </div>
         </div>
     </body>
 </html> 

@@ -1,23 +1,23 @@
 module.exports = class Player {
-        constructor(anUsername, aColor, ruleControlleur,aListMovablePieces) {
+        constructor(anUsername, aColor, ruleControlleur,aListOfPieces) {
                 this.isRacist = Math.floor(Math.random() * 1000) == 1;
                 this.color = aColor;
                 this.username = anUsername;
                 this.isAlive = true;
-                this.listMovablePieces = aListMovablePieces
+                this.listPieces = aListOfPieces
                 this.ruleControlleur = ruleControlleur;
         }
         GetNbMovablePieces(){
-            var movablePieces = aListOfPieces['CAPTAIN'] +
-            aListOfPieces['COLONEL'] +
-            aListOfPieces['GENERAL'] +
-            aListOfPieces['LIEUTENANT'] +
-            aListOfPieces['MAJOR'] +
-            aListOfPieces['MARSHAL'] +
-            aListOfPieces['MINER'] +
-            aListOfPieces['SCOUT'] +
-            aListOfPieces['SERGEANT'] +
-            aListOfPieces['SPY'];
+            var movablePieces = this.listPieces['CAPTAIN'] +
+            this.listPieces['COLONEL'] +
+            this.listPieces['GENERAL'] +
+            this.listPieces['LIEUTENANT'] +
+            this.listPieces['MAJOR'] +
+            this.listPieces['MARSHAL'] +
+            this.listPieces['MINER'] +
+            this.listPieces['SCOUT'] +
+            this.listPieces['SERGEANT'] +
+            this.listPieces['SPY'];
             return movablePieces;
         }
         GetUsername(username) {
