@@ -55,88 +55,92 @@
                 height: 100%;
             }
         </style>
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     </head>
     <body>
-        <div id="map">
-            { map }
-        </div>
+        <div id="app">
+            <div  v-html="datas.map" id="map" >
+            </div>
+        
         <div id="player1Info">
-                <div id="name1">{username1}</div>
+                <div id="name1">{{ datas.username1 }} </div>
                 <div id="pieces1">
-                        <div id="MARSHAL1">Remaning {MARSHAL1} MARSHAL</div>
-                        <div id="GENERAL1">Remaning {GENERAL1} GENERAL</div>
-                        <div id="COLONEL1">Remaning {COLONEL1} COLONEL</div>
-                        <div id="MAJOR1">Remaning {MAJOR1} MAJOR</div>
-                        <div id="CAPTAIN1">Remaning {CAPTAIN1} CAPTAIN</div>
-                        <div id="LIEUTENANT1">Remaning {LIEUTENANT1} LIEUTENANT</div>
-                        <div id="SERGEANT1">Remaning {SERGEANT1} SERGEANT</div>
-                        <div id="MINER1">Remaning {MINER1} MINER</div>
-                        <div id="SCOUT1">Remaning {SCOUT1} SCOUT</div>
-                        <div id="SPY1">Remaning {SPY1} SPY</div>
-                        <div id="FLAG1">Remaning {FLAG1} FLAG</div>
-                        <div id="BOMB1">Remaning {BOMB1} BOMB</div>
+                        <div id="MARSHAL1">Remaning {{ datas.MARSHAL1 }} MARSHAL</div>
+                        <div id="GENERAL1">Remaning {{ datas.GENERAL1 }} GENERAL</div>
+                        <div id="COLONEL1">Remaning {{ datas.COLONEL1 }} COLONEL</div>
+                        <div id="MAJOR1">Remaning {{ datas.MAJOR1 }} MAJOR</div>
+                        <div id="CAPTAIN1">Remaning {{ datas.CAPTAIN1 }} CAPTAIN</div>
+                        <div id="LIEUTENANT1">Remaning {{ datas.LIEUTENANT1 }} LIEUTENANT</div>
+                        <div id="SERGEANT1">Remaning {{ datas.SERGEANT1 }} SERGEANT</div>
+                        <div id="MINER1">Remaning {{ datas.MINER1 }} MINER</div>
+                        <div id="SCOUT1">Remaning {{ datas.SCOUT1 }} SCOUT</div>
+                        <div id="SPY1">Remaning {{ datas.SPY1 }} SPY</div>
+                        <div id="FLAG1">Remaning {{ datas.FLAG1 }} FLAG</div>
+                        <div id="BOMB1">Remaning {{ datas.BOMB1 }} BOMB</div>
                 </div>
-                <button id="btnClaim1" class="{claim1}" onclick="ClaimJ(1)">Claim P1</button>
+                <button id="btnClaim1" v-if="datas.canClaim1" onclick="ClaimJ(1)">Claim P1</button>
         </div>
         <div id="player2Info">
-                <div id="name2">{username2}</div>
+                <div id="name2">{{ datas.username2 }} </div>
                 <div id="pieces2">
-                        <div id="MARSHAL2">Remaning {MARSHAL2} MARSHAL</div>
-                        <div id="GENERAL2">Remaning {GENERAL2} GENERAL</div>
-                        <div id="COLONEL2">Remaning {COLONEL2} COLONEL</div>
-                        <div id="MAJOR2">Remaning {MAJOR2} MAJOR</div>
-                        <div id="CAPTAIN2">Remaning {CAPTAIN2} CAPTAIN</div>
-                        <div id="LIEUTENANT2">Remaning {LIEUTENANT2} LIEUTENANT</div>
-                        <div id="SERGEANT2">Remaning {SERGEANT2} SERGEANT</div>
-                        <div id="MINER2">Remaning {MINER2} MINER</div>
-                        <div id="SCOUT2">Remaning {SCOUT2} SCOUT</div>
-                        <div id="SPY2">Remaning {SPY2} SPY</div>
-                        <div id="FLAG2">Remaning {FLAG2} FLAG</div>
-                        <div id="BOMB2">Remaning {BOMB2} BOMB</div>
+                        <div id="MARSHAL2">Remaning {{ datas.MARSHAL2 }} MARSHAL</div>
+                        <div id="GENERAL2">Remaning {{ datas.GENERAL2 }} GENERAL</div>
+                        <div id="COLONEL2">Remaning {{ datas.COLONEL2 }} COLONEL</div>
+                        <div id="MAJOR2">Remaning {{ datas.MAJOR2 }} MAJOR</div>
+                        <div id="CAPTAIN2">Remaning {{ datas.CAPTAIN2 }} CAPTAIN</div>
+                        <div id="LIEUTENANT2">Remaning {{ datas.LIEUTENANT2 }} LIEUTENANT</div>
+                        <div id="SERGEANT2">Remaning {{ datas.SERGEANT2 }} SERGEANT</div>
+                        <div id="MINER2">Remaning {{ datas.MINER2 }} MINER</div>
+                        <div id="SCOUT2">Remaning {{ datas.SCOUT2 }} SCOUT</div>
+                        <div id="SPY2">Remaning {{ datas.SPY2 }} SPY</div>
+                        <div id="FLAG2">Remaning {{ datas.FLAG2 }} FLAG</div>
+                        <div id="BOMB2">Remaning {{ datas.BOMB2 }} BOMB</div>
                 </div>
-                <button id="btnClaim2" class="{claim2}" onclick="ClaimJ(2)">Claim P2</button>
+                <button id="btnClaim2" v-if="datas.canClaim2" onclick="ClaimJ(2)">Claim P2</button>
         </div>
+    </div>
         <script src="/socket.io/socket.io.js"></script>
         <script>
+              const app = new Vue({
+                el: '#app',
+                data: {
+                    datas : {canClaim1: true, canClaim2:true}
+                }
+              })
+            //SocketIO Connect
             var socket = io.connect('http://127.0.0.1:8080');
+            //Claim a Player to server
             function ClaimJ(player)
             {
-                document.getElementById("btnClaim2").style.display = "none";
-                document.getElementById("btnClaim1").style.display = "none";
                 switch(player)
                 {
                     case 1:
-                        socket.emit('claiming',player,socket.id);
+                        socket.emit('claiming',player);
                        
                         break;
                     case 2:
-                        socket.emit('claiming',player,socket.id);
+                        socket.emit('claiming',player);
                        
                         break;
                     default :
                         break;
                 }
             }
-            console.log(socket);
-            socket.on('connected',function(player){
-               
+            //A player has claimed
+            socket.on('claimed',function(){
+                socket.emit('requestUpdate');
             });
-            socket.on('claimed',function(player,name){        
-                        
-                switch(player)
-                {
-                    case 1:
-                        name1.innerText = name;
-                        break;
-                    case 2:
-                        name2.innerText = name;
-                        break;
-                    default :
-                        break;
-                }
-            })
+
+            //Called when you are completely connected
+            socket.on('Update',function(datas){
+                app.datas = datas;
+            });
+
+            //When the server told us to begin positioning
             socket.on('beginPositioning',function(){
-                
+                //Positioning
+
+                //Told the server that finished
                 socket.emit('endPositioning',socket.id);
             });
         </script>

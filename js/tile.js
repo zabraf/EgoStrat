@@ -18,7 +18,7 @@ module.exports = class Tile{
     SetPiece(piece) {
         this.piece = piece;
     }
-    DrawTile() {
+    DrawTile(player) {
         var draw = "";
         if (this.canGo) {
             if(this.selected){
@@ -27,8 +27,10 @@ module.exports = class Tile{
                 draw = '<div class="tile go">';
             }
            
-            if (this.piece != null) {
-                draw += this.piece.Draw();
+            if (this.piece != null && player == this.piece.player.username) {
+                draw += this.piece.Draw(true);
+            }else if (this.piece != null){
+                draw+= this.piece.Draw(false);
             }
         }
         else {

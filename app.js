@@ -13,6 +13,8 @@ var ruleController = new RuleController();
 const port = 8080;
 const hostname = "127.0.0.1";
 
+var isSetUp = false;
+
 app.get('/img/*', function (req, response) {
     var options = {
         root: __dirname + '\\Client\\',
@@ -37,38 +39,6 @@ app.get('/', function (req, response) {
     });
     fs.readFile('./Client/index.html', 'utf8', function (err, data) {
         if (err) throw err;
-
-        data = data.replace("{ map }", ruleController.DrawMap());
-
-        data = data.replace('{username1}', ruleController.player1.username);
-        data = data.replace('{MARSHAL1}', ruleController.player1.listPieces['MARSHAL']);
-        data = data.replace('{GENERAL1}', ruleController.player1.listPieces['GENERAL']);
-        data = data.replace('{COLONEL1}', ruleController.player1.listPieces['COLONEL']);
-        data = data.replace('{MAJOR1}', ruleController.player1.listPieces['MAJOR']);
-        data = data.replace('{CAPTAIN1}', ruleController.player1.listPieces['CAPTAIN']);
-        data = data.replace('{LIEUTENANT1}', ruleController.player1.listPieces['LIEUTENANT']);
-        data = data.replace('{SERGEANT1}', ruleController.player1.listPieces['SERGEANT']);
-        data = data.replace('{MINER1}', ruleController.player1.listPieces['MINER']);
-        data = data.replace('{SCOUT1}', ruleController.player1.listPieces['SCOUT']);
-        data = data.replace('{SPY1}', ruleController.player1.listPieces['SPY']);
-        data = data.replace('{FLAG1}', ruleController.player1.listPieces['FLAG']);
-        data = data.replace('{BOMB1}', ruleController.player1.listPieces['BOMB']);
-        data = data.replace('{claim1}', ruleController.player1.listPieces['BOMB']);
-
-
-        data = data.replace('{username2}', ruleController.player2.username);
-        data = data.replace('{MARSHAL2}', ruleController.player2.listPieces['MARSHAL']);
-        data = data.replace('{GENERAL2}', ruleController.player2.listPieces['GENERAL']);
-        data = data.replace('{COLONEL2}', ruleController.player2.listPieces['COLONEL']);
-        data = data.replace('{MAJOR2}', ruleController.player2.listPieces['MAJOR']);
-        data = data.replace('{CAPTAIN2}', ruleController.player2.listPieces['CAPTAIN']);
-        data = data.replace('{LIEUTENANT2}', ruleController.player2.listPieces['LIEUTENANT']);
-        data = data.replace('{SERGEANT2}', ruleController.player2.listPieces['SERGEANT']);
-        data = data.replace('{MINER2}', ruleController.player2.listPieces['MINER']);
-        data = data.replace('{SCOUT2}', ruleController.player2.listPieces['SCOUT']);
-        data = data.replace('{SPY2}', ruleController.player2.listPieces['SPY']);
-        data = data.replace('{FLAG2}', ruleController.player2.listPieces['FLAG']);
-        data = data.replace('{BOMB2}', ruleController.player2.listPieces['BOMB']);
         response.write(data);
         response.end();
     });
@@ -78,50 +48,94 @@ var cpt = 0;
 
 // Quand un client se connecte, on le note dans la console
 io.sockets.on('connection', function (client) {
-    cpt ++;
     console.log('Un client est connecté !' + client.id);
     client.on('disconnect', function () {
-        cpt --;
-        console.log(cpt);
+        if(ruleController.player1.username == client.id){
+            ruleController.player1.username = "P1";
+            client.emit('Update', UpdateMap(client.id));
+        }
+        if(ruleController.player2.username == client.id){
+            ruleController.player2.username = "P2";
+            client.emit('Update', UpdateMap(client.id));
+        }
         console.log('un client se déconnect !' + client.id);
     });
-    console.log(cpt);
-    console.log(client);
-    client.on('claiming', function (player,clientId) {
+    client.on('claiming', function (player) {
         switch (player) {
             case 1:
-                if (ruleController.player1.username == "P1" && ruleController.player2.username != clientId) {
-                    io.sockets.emit('claimed', player, clientId);
-                    ruleController.player1.username = clientId;
+                if (ruleController.player1.username == "P1" && ruleController.player2.username != client.id) {
+                    io.sockets.emit('claimed', player, client.id);
+                    ruleController.player1.username = client.id;
                 }
                 break;
             case 2:
-                if (ruleController.player2.username == "P2" && ruleController.player1.username != clientId) {
-                    io.sockets.emit('claimed', player, clientId);
-                    ruleController.player2.username = clientId;
+                if (ruleController.player2.username == "P2" && ruleController.player1.username != client.id) {
+                    io.sockets.emit('claimed', player, client.id);
+                    ruleController.player2.username = client.id;
                 }
                 break;
             default:
                 break;
         }
-        if(ruleController.player1.username != "P1" && ruleController.player2.username != "P2"){
+        if (!isSetUp && ruleController.player1.username != "P1" && ruleController.player2.username != "P2") {
             ruleController.SetupPlayer();
-            io.sockets.emit('UpdateMap',ruleController.map);
+            isSetUp = true;
         }
     });
 
-    client.emit('connected', client.id);
+    client.emit('Update', UpdateMap(client.id));
+    client.on('requestUpdate',function(){
+        client.emit('Update',UpdateMap(client.id));
+    });
 });
 
 
 function startGame() {
-
     io.sockets.emit('beginPositioning', piecesToPut);
     io.sockets.on('endPositioning', function (clientId) {
         io.sockets.emit('chatLog', clientId + " has finished placing");
     });
 }
+function UpdateMap(player = "none") {
+    if(typeof player == "undefined"){
+        player = "none";
+    }
 
+    var datas = {
+        'map': ruleController.DrawMap(player),
+
+        'username1': ruleController.player1.username,
+        'MARSHAL1': ruleController.player1.listPieces['MARSHAL'],
+        'GENERAL1': ruleController.player1.listPieces['GENERAL'],
+        'COLONEL1': ruleController.player1.listPieces['COLONEL'],
+        'MAJOR1': ruleController.player1.listPieces['MAJOR'],
+        'CAPTAIN1': ruleController.player1.listPieces['CAPTAIN'],
+        'LIEUTENANT1': ruleController.player1.listPieces['LIEUTENANT'],
+        'SERGEANT1': ruleController.player1.listPieces['SERGEANT'],
+        'MINER1': ruleController.player1.listPieces['MINER'],
+        'SCOUT1': ruleController.player1.listPieces['SCOUT'],
+        'SPY1': ruleController.player1.listPieces['SPY'],
+        'FLAG1': ruleController.player1.listPieces['FLAG'],
+        'BOMB1': ruleController.player1.listPieces['BOMB'],
+        'canClaim1': ruleController.player1.username == "P1",
+
+        'username2': ruleController.player2.username,
+        'MARSHAL2': ruleController.player2.listPieces['MARSHAL'],
+        'GENERAL2': ruleController.player2.listPieces['GENERAL'],
+        'COLONEL2': ruleController.player2.listPieces['COLONEL'],
+        'MAJOR2': ruleController.player2.listPieces['MAJOR'],
+        'CAPTAIN2': ruleController.player2.listPieces['CAPTAIN'],
+        'LIEUTENANT2': ruleController.player2.listPieces['LIEUTENANT'],
+        'SERGEANT2': ruleController.player2.listPieces['SERGEANT'],
+        'MINER2': ruleController.player2.listPieces['MINER'],
+        'SCOUT2': ruleController.player2.listPieces['SCOUT'],
+        'SPY2': ruleController.player2.listPieces['SPY'],
+        'FLAG2': ruleController.player2.listPieces['FLAG'],
+        'BOMB2': ruleController.player2.listPieces['BOMB'],
+        'canClaim2': ruleController.player2.username == "P2",
+    };
+    return datas;
+}
 
 server.listen(port, hostname);
 
