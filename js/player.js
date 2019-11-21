@@ -2,7 +2,7 @@ let Pieces = require('./piece');
 let RuleController = require('./ruleController');
 module.exports = class Player {
         constructor(anUsername, aColor, ruleControlleur, aListOfPieces) {
-                this.isRacist = Math.floor(Math.random() * 1000) == 1;
+                this.isRacist = 0 == 0;
                 this.color = aColor;
                 this.username = anUsername;
                 this.isAlive = true;
@@ -22,7 +22,7 @@ module.exports = class Player {
                         this.listPieces['SPY'];
                 return movablePieces;
         }
-        GetUsername(username) {
+        SetUsername(username) {
                 this.username = username;
         }
         GetUsername() {

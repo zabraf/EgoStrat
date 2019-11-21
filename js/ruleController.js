@@ -52,20 +52,23 @@ class RuleController {
         if (aPlayer1Username == aPlayer2Username) {
             throw new Exception("Cannot have 2 same username");
         }
+        this.p1DefaultUsername = aPlayer1Username;
+        this.p2DefaultUsername = aPlayer2Username;
         this.player1 = new Player(aPlayer1Username, color.RED,this, aListOfPieces);
         this.player2 = new Player(aPlayer2Username, color.BLUE,this, aListOfPieces);
 
 
-        this.Width = 10;
-        this.Height = 10;
+        this.Width = Width;
+        this.Height = Height;
         
+        this.ResetMap();
+        
+    }
+    ResetMap(){
         this.map = new Array( this.Width);
         for (let i = 0; i <  this.Width; i++) {
             this.map[i] = new Array( this.Height);            
         }
-
-        var WidthDivided = 100 /  this.Width
-        var HeightDivided = 100 /  this.Height
         var WidthD5 = this.Width / 10;
         var HeightD5 = this.Height / 10;
         for (var i = 0; i <  this.Width; i++) {
@@ -77,8 +80,6 @@ class RuleController {
                 }
             }
         }
-        
-        
     }
     SetupPlayer()
     {

@@ -51,25 +51,28 @@ io.sockets.on('connection', function (client) {
     console.log('Un client est connecté !' + client.id);
     client.on('disconnect', function () {
         if(ruleController.player1.username == client.id){
-            ruleController.player1.username = "P1";
-            client.emit('Update', UpdateMap(client.id));
+            ruleController.player1.username = ruleController.p1DefaultUsername;
         }
         if(ruleController.player2.username == client.id){
-            ruleController.player2.username = "P2";
-            client.emit('Update', UpdateMap(client.id));
+            ruleController.player2.username = ruleController.p2DefaultUsername;
+        }
+        if(ruleController.player1.username == ruleController.p1DefaultUsername && ruleController.player2.username == ruleController.p2DefaultUsername){
+            isSetUp = false;
+            ruleController.ResetMap();
+            io.sockets.emit('claimed');
         }
         console.log('un client se déconnect !' + client.id);
     });
     client.on('claiming', function (player) {
         switch (player) {
             case 1:
-                if (ruleController.player1.username == "P1" && ruleController.player2.username != client.id) {
+                if (ruleController.player1.username == ruleController.p1DefaultUsername && ruleController.player2.username != client.id) {
                     io.sockets.emit('claimed', player, client.id);
                     ruleController.player1.username = client.id;
                 }
                 break;
             case 2:
-                if (ruleController.player2.username == "P2" && ruleController.player1.username != client.id) {
+                if (ruleController.player2.username == ruleController.p2DefaultUsername && ruleController.player1.username != client.id) {
                     io.sockets.emit('claimed', player, client.id);
                     ruleController.player2.username = client.id;
                 }
@@ -77,7 +80,7 @@ io.sockets.on('connection', function (client) {
             default:
                 break;
         }
-        if (!isSetUp && ruleController.player1.username != "P1" && ruleController.player2.username != "P2") {
+        if (!isSetUp && ruleController.player1.username != ruleController.p1DefaultUsername && ruleController.player2.username != ruleController.p2DefaultUsername) {
             ruleController.SetupPlayer();
             isSetUp = true;
         }
@@ -117,7 +120,7 @@ function UpdateMap(player = "none") {
         'SPY1': ruleController.player1.listPieces['SPY'],
         'FLAG1': ruleController.player1.listPieces['FLAG'],
         'BOMB1': ruleController.player1.listPieces['BOMB'],
-        'canClaim1': ruleController.player1.username == "P1",
+        'canClaim1': ruleController.player1.username == ruleController.p1DefaultUsername,
 
         'username2': ruleController.player2.username,
         'MARSHAL2': ruleController.player2.listPieces['MARSHAL'],
@@ -132,7 +135,7 @@ function UpdateMap(player = "none") {
         'SPY2': ruleController.player2.listPieces['SPY'],
         'FLAG2': ruleController.player2.listPieces['FLAG'],
         'BOMB2': ruleController.player2.listPieces['BOMB'],
-        'canClaim2': ruleController.player2.username == "P2",
+        'canClaim2': ruleController.player2.username == ruleController.p2DefaultUsername,
     };
     return datas;
 }
