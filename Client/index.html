@@ -17,8 +17,25 @@
             .go {
                 background-color: green;
             }
+            .PlayerBlue {
+                background-color: deepskyblue;
+                width : 100%;
+                height: 100%;
+            }
+            .PlayerRed{
+                background-color: palevioletred;
+                width : 100%;
+                height: 100%;
+            }
+            .PlayerBlue .racist{
+                background-color: plum;
+            }
+            .PlayerRed .racist{
+                background-color: mediumspringgreen;
+            }
             .cantgo {
-                background-color: red;
+                background-color: lightgray;
+                border-color: grey;
             }
              .go:hover{
                  cursor: pointer;
@@ -32,6 +49,10 @@
             }
             .selected {
                 background-color: yellow;
+            }
+            img{
+                width: 100%;
+                height: 100%;
             }
         </style>
     </head>
@@ -55,6 +76,7 @@
                         <div id="FLAG1">Remaning {FLAG1} FLAG</div>
                         <div id="BOMB1">Remaning {BOMB1} BOMB</div>
                 </div>
+                <button id="btnClaim1" class="{claim1}" onclick="ClaimJ(1)">Claim P1</button>
         </div>
         <div id="player2Info">
                 <div id="name2">{username2}</div>
@@ -72,6 +94,51 @@
                         <div id="FLAG2">Remaning {FLAG2} FLAG</div>
                         <div id="BOMB2">Remaning {BOMB2} BOMB</div>
                 </div>
+                <button id="btnClaim2" class="{claim2}" onclick="ClaimJ(2)">Claim P2</button>
         </div>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var socket = io.connect('http://127.0.0.1:8080');
+            function ClaimJ(player)
+            {
+                document.getElementById("btnClaim2").style.display = "none";
+                document.getElementById("btnClaim1").style.display = "none";
+                switch(player)
+                {
+                    case 1:
+                        socket.emit('claiming',player,socket.id);
+                       
+                        break;
+                    case 2:
+                        socket.emit('claiming',player,socket.id);
+                       
+                        break;
+                    default :
+                        break;
+                }
+            }
+            console.log(socket);
+            socket.on('connected',function(player){
+               
+            });
+            socket.on('claimed',function(player,name){        
+                        
+                switch(player)
+                {
+                    case 1:
+                        name1.innerText = name;
+                        break;
+                    case 2:
+                        name2.innerText = name;
+                        break;
+                    default :
+                        break;
+                }
+            })
+            socket.on('beginPositioning',function(){
+                
+                socket.emit('endPositioning',socket.id);
+            });
+        </script>
     </body>
 </html> 

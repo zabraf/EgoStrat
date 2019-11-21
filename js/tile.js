@@ -28,7 +28,7 @@ module.exports = class Tile{
             }
            
             if (this.piece != null) {
-                draw += this.piece.draw;
+                draw += this.piece.Draw();
             }
         }
         else {

@@ -6,7 +6,7 @@ const color = {
     BLUE: 'blue',
     RED: 'red',
     SPECTATOR: 'grey'
-}
+};
 const type = {
     MARSHAL: { name: 'MARSHAL', img: '/img/marshal.svg', strength: 10 },
     GENERAL: { name: 'GENERAL', img: '/img/general.svg', strength: 9 },
@@ -20,7 +20,7 @@ const type = {
     SPY: { name: 'SPY', img: '/img/spy.svg', strength: 1 },
     FLAG: { name: 'FLAG', img: '/img/flag.svg', strength: 0 },
     BOMB: { name: 'BOMB', img: '/img/bomb.svg', strength: 11 },
-}
+};
 
 const DEFAULT_SET = {
     'MARSHAL': 1,
@@ -35,10 +35,9 @@ const DEFAULT_SET = {
     'SPY': 1,
     'FLAG': 1,
     'BOMB': 6,
-}
+};
 
-module.exports = class RuleController {
-
+class RuleController {
     /**
      * 
      * @param {string} aPlayer1Username 
@@ -49,6 +48,7 @@ module.exports = class RuleController {
      */
     constructor(aPlayer1Username = "P1", aPlayer2Username = "P2", Width = 10, Height = 10, aListOfPieces = DEFAULT_SET) {
         
+    this.TYPE = type;
         if (aPlayer1Username == aPlayer2Username) {
             throw new Exception("Cannot have 2 same username");
         }
@@ -71,19 +71,23 @@ module.exports = class RuleController {
         for (var i = 0; i <  this.Width; i++) {
             for (var j = 0; j <  this.Height; j++) {
                 if(((i >= WidthD5 *2 && i < WidthD5*4) || (i >= WidthD5 * 6 && i < WidthD5*8)) && (j >= HeightD5*4 && j < HeightD5 * 6)) {
-                    this.map[i][j] = new Tile(i,j,false);
+                    this.map[j][i] = new Tile(j,i,false);
                 }else{
-                    this.map[i][j] = new Tile(i,j);
+                    this.map[j][i] = new Tile(j,i);
                 }
-                /*if ((WidthDivided * i >= 40 && WidthDivided * i <= 50)  && (( HeightDivided * j >= 60 &&  HeightDivided * j <= 70) || ( HeightDivided * j >= 20 &&  HeightDivided * j <= 30)) ) {
-                    this.map[i][j] = new Tile(i,j,false);
-                }else{
-                    this.map[i][j] = new Tile(i,j);
-                }*/
             }
         }
         
+        
     }
+    SetupPlayer()
+    {
+            var arrayP1 = this.player1.PutPieces(this.map.slice(-4));
+            var arrayP2 = this.player2.PutPieces(this.map.slice(0,4));
+            this.map = this.map.slice(0,-4).concat(arrayP1);
+            this.map = arrayP2.concat(this.map.slice(4));
+    }
+
     /**
      * Move piece in tileDeparture to tileArrival
      * @param {Tile} tileDeparture 
@@ -267,3 +271,4 @@ module.exports = class RuleController {
         });
     }
 }
+module.exports = RuleController;
