@@ -47,46 +47,47 @@ class RuleController {
      * @param {Array<GameSet>} aListOfPieces 'PieceName' : nbPieces 
      */
     constructor(aPlayer1Username = "P1", aPlayer2Username = "P2", Width = 10, Height = 10, aListOfPieces = DEFAULT_SET) {
-        
-    this.TYPE = type;
+
+        this.TYPE = type;
         if (aPlayer1Username == aPlayer2Username) {
             throw new Exception("Cannot have 2 same username");
         }
         this.p1DefaultUsername = aPlayer1Username;
         this.p2DefaultUsername = aPlayer2Username;
-        this.player1 = new Player(aPlayer1Username, color.RED,this, aListOfPieces);
-        this.player2 = new Player(aPlayer2Username, color.BLUE,this, aListOfPieces);
-
+        this.defaultListOfPieces = aListOfPieces;
 
         this.Width = Width;
         this.Height = Height;
-        
-        this.ResetMap();
-        
+
+        this.ResetGame();
     }
-    ResetMap(){
-        this.map = new Array( this.Width);
-        for (let i = 0; i <  this.Width; i++) {
-            this.map[i] = new Array( this.Height);            
+    ResetGame() {
+        this.player1 = new Player(this.p1DefaultUsername, color.RED, this, this.defaultListOfPieces);
+        this.player2 = new Player(this.p2DefaultUsername, color.BLUE, this, this.defaultListOfPieces);
+        this.ResetMap();
+    }
+    ResetMap() {
+        this.map = new Array(this.Width);
+        for (let i = 0; i < this.Width; i++) {
+            this.map[i] = new Array(this.Height);
         }
         var WidthD5 = this.Width / 10;
         var HeightD5 = this.Height / 10;
-        for (var i = 0; i <  this.Width; i++) {
-            for (var j = 0; j <  this.Height; j++) {
-                if(((i >= WidthD5 *2 && i < WidthD5*4) || (i >= WidthD5 * 6 && i < WidthD5*8)) && (j >= HeightD5*4 && j < HeightD5 * 6)) {
-                    this.map[j][i] = new Tile(j,i,false);
-                }else{
-                    this.map[j][i] = new Tile(j,i);
+        for (var i = 0; i < this.Width; i++) {
+            for (var j = 0; j < this.Height; j++) {
+                if (((i >= WidthD5 * 2 && i < WidthD5 * 4) || (i >= WidthD5 * 6 && i < WidthD5 * 8)) && (j >= HeightD5 * 4 && j < HeightD5 * 6)) {
+                    this.map[j][i] = new Tile(j, i, false);
+                } else {
+                    this.map[j][i] = new Tile(j, i);
                 }
             }
         }
     }
-    SetupPlayer()
-    {
-            var arrayP1 = this.player1.PutPieces(this.map.slice(-4));
-            var arrayP2 = this.player2.PutPieces(this.map.slice(0,4));
-            this.map = this.map.slice(0,-4).concat(arrayP1);
-            this.map = arrayP2.concat(this.map.slice(4));
+    SetupPlayer() {
+        var arrayP1 = this.player1.PutPieces(this.map.slice(-4));
+        var arrayP2 = this.player2.PutPieces(this.map.slice(0, 4));
+        this.map = this.map.slice(0, -4).concat(arrayP1);
+        this.map = arrayP2.concat(this.map.slice(4));
     }
 
     /**
@@ -95,19 +96,24 @@ class RuleController {
      * @param {Tile} tileArrival 
      */
     MovePiece(tileDeparture, tileArrival) {
-        
-        if(tileArrival.piece != null){
-            if(tileArrival.piece.player === tileDeparture.piece.player){
+
+        if (tileArrival.piece != null) {
+            if (tileArrival.piece.player === tileDeparture.piece.player) {
                 throw new Exception("Oh nooooooon");
-            }else{
-                tileArrival.piece = this.Fight(tileDeparture.piece,tileArrival.piece);
+            } else {
+                tileArrival.piece = this.Fight(tileDeparture.piece, tileArrival.piece);
                 tileDeparture.piece = null;
+                var str = (tileArrival.piece == null ? "nobody" : tileArrival.piece.player) + " won the fight";
+                return str;
             }
-        }else{
+        } else {
+
             tileArrival.piece = tileDeparture.piece;
             tileDeparture.piece = null;
+            var str = tileArrival.piece.player.username + " moved a piece";
+            return str;
         }
-        
+
     }
     /**
      * Combat deux pieces l'une contre l'autre
@@ -122,17 +128,17 @@ class RuleController {
             result = piece2;
         } else if (piece2.GetType().strength < piece1.GetType().strength) {
             result = piece1;
-            if(piece2.GetType() == type.FLAG){
+            if (piece2.GetType() == type.FLAG) {
                 piece2.GetPlayer().isAlive = false;
             }
         } else {
             result = null;
 
-            this.Die(piece1);
-            this.Die(piece2);
+            piece1.Die();
+            piece2.Die();
 
-            this.CheckWin(this.player1,this.player2);
-            this.CheckWin(this.player2,this.player1);
+            this.CheckWin(this.player1, this.player2);
+            this.CheckWin(this.player2, this.player1);
         }
 
         //Special cases
@@ -166,10 +172,10 @@ class RuleController {
 
         if (result == piece1) {
             piece2.Die();
-            this.CheckWin(piece1.GetPlayer(),piece2.GetPlayer());
+            this.CheckWin(piece1.GetPlayer(), piece2.GetPlayer());
         } else if (result == piece2) {
             piece1.Die();
-            this.CheckWin(piece2.GetPlayer(),piece1.GetPlayer());
+            this.CheckWin(piece2.GetPlayer(), piece1.GetPlayer());
         }
 
         return result;
@@ -179,8 +185,8 @@ class RuleController {
      * @param {Player} player 
      * @param {Player} opponent 
      */
-    CheckWin(player,opponent) {
-        return opponent.GetNBMovablePieces <= 0 || opponent.listOfPieces['FLAG'] <= 0;
+    CheckWin(player, opponent) {
+        return opponent.GetNbMovablePieces() <= 0 || !opponent.HasFlag();
     }
     /**
      * Draw the entire map
@@ -188,7 +194,7 @@ class RuleController {
     DrawMap(player) {
         var drawedMap = "";
         for (var j = 0; j < this.Height; j++) {
-            drawedMap+= "<div class=\"row\">";
+            drawedMap += "<div class=\"row\">";
             for (var i = 0; i < this.Width; i++) {
                 drawedMap += this.map[i][j].DrawTile(player);
             }
@@ -201,74 +207,78 @@ class RuleController {
      * @param {Tile} tileDeparture 
      */
     WherePieceCanGo(tileDeparture) {
-        var canGoTopY = false;
-        var canGoBotY = false;
-        var canGoRightX = false;
-        var canGoLeftX = false;
-        if (tileDeparture.piece.GetType() == type.SCOUT) {
-            canGoTopY = true;
-            canGoBotY = true;
-            canGoRightX = true;
-            canGoLeftX = true;
+
+        if (tileDeparture.piece.GetType() != type.BOMB && tileDeparture.piece.GetType() != type.FLAG) {
+            var canGoTopY = true;
+            var canGoBotY = true;
+            var canGoRightX = true;
+            var canGoLeftX = true;
+
+            var X = tileDeparture.GetX();
+            var Y = tileDeparture.GetY();
+
+            for (let x = X + 1; x < this.map.length && canGoRightX; x++) {
+
+                canGoRightX = (tileDeparture.piece.GetType() == type.SCOUT);
+
+                if (this.map[x][Y].GetPiece() == null || this.map[x][Y].GetPiece().player != tileDeparture.GetPiece().player) {
+                    this.map[x][Y].selected = true;
+                } else {
+                    canGoRightX = false;
+                }
+                if (this.map[x][Y].GetPiece() != null && this.map[x][Y].GetPiece().player != tileDeparture.GetPiece().player) {
+                    canGoRightX = false;
+                }
+            }
+
+            for (let x = X - 1; x >= 0 && canGoLeftX; x--) {
+
+                canGoLeftX = (tileDeparture.piece.GetType() == type.SCOUT);
+
+                if (this.map[x][Y].GetPiece() == null || this.map[x][Y].GetPiece().player != tileDeparture.GetPiece().player) {
+                    this.map[x][Y].selected = true;
+                } else {
+                    canGoLeftX = false;
+                }
+                if (this.map[x][Y].GetPiece() != null && this.map[x][Y].GetPiece().player != tileDeparture.GetPiece().player) {
+                    canGoLeftX = false;
+                }
+            }
+            for (let y = Y + 1; y < this.map[X].length && canGoBotY; y++) {
+
+                canGoBotY = (tileDeparture.piece.GetType() == type.SCOUT);
+
+                if (this.map[X][y].GetPiece() == null || this.map[X][y].GetPiece().player != tileDeparture.GetPiece().player) {
+                    this.map[X][y].selected = true;
+                } else {
+                    canGoBotY = false;
+                }
+                if (this.map[X][y].GetPiece() != null && this.map[X][y].GetPiece().player != tileDeparture.GetPiece().player) {
+                    canGoBotY = false;
+                }
+            }
+
+            for (let y = Y - 1; y >= 0 && canGoTopY; y--) {
+
+                canGoTopY = (tileDeparture.piece.GetType() == type.SCOUT);
+
+                if (this.map[X][y].GetPiece() == null || this.map[X][y].GetPiece().player != tileDeparture.GetPiece().player) {
+                    this.map[X][y].selected = true;
+                } else {
+                    canGoTopY = false;
+                }
+                if (this.map[X][y].GetPiece() != null && this.map[X][y].GetPiece().player != tileDeparture.GetPiece().player) {
+                    canGoTopY = false;
+                }
+            }
         }
-
-        var X = tileDeparture.GetX();
-        var Y = tileDeparture.GetY() + 1;
-        do {
-            if (this.map[X][Y] == null || this.map[X][Y].getPiece() != null || this.map[X][Y].canGo == false) {
-                canGoTopY = false;
-            }
-            else {
-                this.map[X][Y].selected = true;
-                Y = Y + 1;
-            }
-
-        } while (canGoTopY)
-
-        X = tileDeparture.GetX();
-        Y = tileDeparture.GetY() - 1;
-        do {
-            if (this.map[X][Y] == null || this.map[X][Y].getPiece() != null || this.map[X][Y].canGo == false) {
-                canGoBotY = false;
-            }
-            else {
-                this.map[X][Y].selected = true;
-                Y = Y - 1;
-            }
-        } while (canGoBotY)
-
-        X = tileDeparture.GetX() + 1;
-        Y = tileDeparture.GetY();
-        do {
-            if (this.map[X][Y] == null || this.map[X][Y].getPiece() != null || this.map[X][Y].canGo == false) {
-                canGoRightX = false;
-            }
-            else {
-                this.map[X][Y].selected = true;
-                X = X + 1;
-            }
-        } while (canGoRightX)
-
-        X = tileDeparture.GetX() - 1;
-        Y = tileDeparture.GetY();
-        do {
-            if (this.map[X][Y] == null || this.map[X][Y].getPiece() != null || this.map[X][Y].canGo == false) {
-                canGoLeftX = false;
-            }
-            else {
-                this.map[X][Y].selected = true;
-                X = X - 1;
-            }
-        } while (canGoLeftX)
     }
     /**
      * Unselect all tiles in map
      */
-    Unselect()
-    {
-        map.forEach(mapx => {
-            mapx.forEach(tile => {tile.selected = false;});
-            
+    Unselect() {
+        this.map.forEach(mapx => {
+            mapx.forEach(tile => { tile.selected = false; });
         });
     }
 }

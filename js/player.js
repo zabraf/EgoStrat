@@ -2,12 +2,15 @@ let Pieces = require('./piece');
 let RuleController = require('./ruleController');
 module.exports = class Player {
         constructor(anUsername, aColor, ruleControlleur, aListOfPieces) {
-                this.isRacist = 0 == 0;
+                this.isRacist = Math.round(Math.random()*100)>=95;
                 this.color = aColor;
                 this.username = anUsername;
                 this.isAlive = true;
                 this.listPieces = aListOfPieces
                 this.ruleControlleur = ruleControlleur;
+        }
+        HasFlag(){
+                return this.listPieces['FLAG'] > 0;
         }
         GetNbMovablePieces() {
                 var movablePieces = this.listPieces['CAPTAIN'] +

@@ -1,164 +1,215 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <style>
-            div {
-                vertical-align: top;
-            }
-            #app{
-                margin: auto;
-                text-align: center;
-            }
-            #map, #player1Info, #player2Info{
-                display: inline-block;
-            }
-            #InfoBlock{
-                display: inline-block;
-            }
-            #chatLog{
-                border: 2px solid black;
-                min-height: 100px;
-            }
-            .tile {
-                width: 50px;
-                height: 50px;
-                display: inline-block;
-                border:1px solid black;
-            }
-            .go {
-                background-color: green;
-            }
-            .PlayerBlue {
-                background-color: deepskyblue;
-                width : 100%;
-                height: 100%;
-            }
-            .PlayerRed{
-                background-color: palevioletred;
-                width : 100%;
-                height: 100%;
-            }
-            .PlayerBlue .racist{
-                background-color: plum;
-            }
-            .PlayerRed .racist{
-                background-color: mediumspringgreen;
-            }
-            .cantgo {
-                background-color: lightgray;
-                border-color: grey;
-            }
-             .go:hover{
-                 cursor: pointer;
-                background-color: greenyellow;
-            }
-            .go:active{
-                border-width: 2px;
-                width: 48px;
-                height: 48px;
-                background-color: #75c200;
-            }
-            .selected {
-                background-color: yellow;
-            }
-            img{
-                width: 100%;
-                height: 100%;
-            }
-            
-        </style>
-        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    </head>
-    <body>
-        <div id="app">
-            <div  v-html="datas.map" id="map" >
-            </div>
+
+<head>
+    <style>
+        div {
+            vertical-align: top;
+        }
+
+        #app {
+            margin: auto;
+            text-align: center;
+        }
+
+        #map,
+        #player1Info,
+        #player2Info {
+            display: inline-block;
+        }
+
+        #InfoBlock {
+            display: inline-block;
+        }
+
+        #chatLog {
+            border: 2px solid black;
+            min-height: 100px;
+        }
+
+        .tile {
+            width: 50px;
+            height: 50px;
+            display: inline-block;
+            border: 1px solid black;
+        }
+
+        .go {
+            background-color: green;
+        }
+
+        .PlayerBlue,
+        .PlayerRed {
+            width: 100%;
+            height: 100%;
+        }
+
+        .PlayerBlue {
+            background-color: deepskyblue;
+        }
+
+        .PlayerRed {
+            background-color: palevioletred;
+        }
+
+        .PlayerBlue .racist {
+            background-color: plum;
+        }
+
+        .PlayerRed .racist {
+            background-color: mediumspringgreen;
+        }
+
+        .cantgo {
+            background-color: lightgray;
+            border-color: grey;
+        }
+
+        .go:hover {
+            cursor: pointer;
+            background-color: greenyellow;
+        }
+
+        .go:active {
+            border-width: 2px;
+            width: 48px;
+            height: 48px;
+            background-color: #75c200;
+        }
+
+        .selected {
+            background-color: yellow;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div v-html="datas.map" id="map">
+        </div>
         <div id="InfoBlock">
             <div id="player2Info">
-                    <div id="name2">{{ datas.username2 }} </div>
-                    <div id="pieces2">
-                            <div id="MARSHAL2">Remaning {{ datas.MARSHAL2 }} MARSHAL</div>
-                            <div id="GENERAL2">Remaning {{ datas.GENERAL2 }} GENERAL</div>
-                            <div id="COLONEL2">Remaning {{ datas.COLONEL2 }} COLONEL</div>
-                            <div id="MAJOR2">Remaning {{ datas.MAJOR2 }} MAJOR</div>
-                            <div id="CAPTAIN2">Remaning {{ datas.CAPTAIN2 }} CAPTAIN</div>
-                            <div id="LIEUTENANT2">Remaning {{ datas.LIEUTENANT2 }} LIEUTENANT</div>
-                            <div id="SERGEANT2">Remaning {{ datas.SERGEANT2 }} SERGEANT</div>
-                            <div id="MINER2">Remaning {{ datas.MINER2 }} MINER</div>
-                            <div id="SCOUT2">Remaning {{ datas.SCOUT2 }} SCOUT</div>
-                            <div id="SPY2">Remaning {{ datas.SPY2 }} SPY</div>
-                            <div id="FLAG2">Remaning {{ datas.FLAG2 }} FLAG</div>
-                            <div id="BOMB2">Remaning {{ datas.BOMB2 }} BOMB</div>
-                    </div>
-                    <button id="btnClaim2" v-if="datas.canClaim2" onclick="ClaimJ(2)">Claim P2</button>
+                <div id="name2">{{ datas.username2 }} </div>
+                <div id="pieces2">
+                    <div id="MARSHAL2">Remaning {{ datas.MARSHAL2 }} MARSHAL</div>
+                    <div id="GENERAL2">Remaning {{ datas.GENERAL2 }} GENERAL</div>
+                    <div id="COLONEL2">Remaning {{ datas.COLONEL2 }} COLONEL</div>
+                    <div id="MAJOR2">Remaning {{ datas.MAJOR2 }} MAJOR</div>
+                    <div id="CAPTAIN2">Remaning {{ datas.CAPTAIN2 }} CAPTAIN</div>
+                    <div id="LIEUTENANT2">Remaning {{ datas.LIEUTENANT2 }} LIEUTENANT</div>
+                    <div id="SERGEANT2">Remaning {{ datas.SERGEANT2 }} SERGEANT</div>
+                    <div id="MINER2">Remaning {{ datas.MINER2 }} MINER</div>
+                    <div id="SCOUT2">Remaning {{ datas.SCOUT2 }} SCOUT</div>
+                    <div id="SPY2">Remaning {{ datas.SPY2 }} SPY</div>
+                    <div id="FLAG2">Remaning {{ datas.FLAG2 }} FLAG</div>
+                    <div id="BOMB2">Remaning {{ datas.BOMB2 }} BOMB</div>
+                </div>
+                <button id="btnClaim2" v-if="datas.canClaim2" onclick="ClaimJ(2)">Claim P2</button>
             </div>
             <div id="player1Info">
-                    <div id="name1">{{ datas.username1 }} </div>
-                    <div id="pieces1">
-                            <div id="MARSHAL1">Remaning {{ datas.MARSHAL1 }} MARSHAL</div>
-                            <div id="GENERAL1">Remaning {{ datas.GENERAL1 }} GENERAL</div>
-                            <div id="COLONEL1">Remaning {{ datas.COLONEL1 }} COLONEL</div>
-                            <div id="MAJOR1">Remaning {{ datas.MAJOR1 }} MAJOR</div>
-                            <div id="CAPTAIN1">Remaning {{ datas.CAPTAIN1 }} CAPTAIN</div>
-                            <div id="LIEUTENANT1">Remaning {{ datas.LIEUTENANT1 }} LIEUTENANT</div>
-                            <div id="SERGEANT1">Remaning {{ datas.SERGEANT1 }} SERGEANT</div>
-                            <div id="MINER1">Remaning {{ datas.MINER1 }} MINER</div>
-                            <div id="SCOUT1">Remaning {{ datas.SCOUT1 }} SCOUT</div>
-                            <div id="SPY1">Remaning {{ datas.SPY1 }} SPY</div>
-                            <div id="FLAG1">Remaning {{ datas.FLAG1 }} FLAG</div>
-                            <div id="BOMB1">Remaning {{ datas.BOMB1 }} BOMB</div>
-                    </div>
-                    <button id="btnClaim1" v-if="datas.canClaim1" onclick="ClaimJ(1)">Claim P1</button>
+                <div id="name1">{{ datas.username1 }} </div>
+                <div id="pieces1">
+                    <div id="MARSHAL1">Remaning {{ datas.MARSHAL1 }} MARSHAL</div>
+                    <div id="GENERAL1">Remaning {{ datas.GENERAL1 }} GENERAL</div>
+                    <div id="COLONEL1">Remaning {{ datas.COLONEL1 }} COLONEL</div>
+                    <div id="MAJOR1">Remaning {{ datas.MAJOR1 }} MAJOR</div>
+                    <div id="CAPTAIN1">Remaning {{ datas.CAPTAIN1 }} CAPTAIN</div>
+                    <div id="LIEUTENANT1">Remaning {{ datas.LIEUTENANT1 }} LIEUTENANT</div>
+                    <div id="SERGEANT1">Remaning {{ datas.SERGEANT1 }} SERGEANT</div>
+                    <div id="MINER1">Remaning {{ datas.MINER1 }} MINER</div>
+                    <div id="SCOUT1">Remaning {{ datas.SCOUT1 }} SCOUT</div>
+                    <div id="SPY1">Remaning {{ datas.SPY1 }} SPY</div>
+                    <div id="FLAG1">Remaning {{ datas.FLAG1 }} FLAG</div>
+                    <div id="BOMB1">Remaning {{ datas.BOMB1 }} BOMB</div>
+                </div>
+                <button id="btnClaim1" v-if="datas.canClaim1" onclick="ClaimJ(1)">Claim P1</button>
             </div>
             <div id="chatLog">
-
+                {{ datas.chatlog }}
             </div>
         </div>
     </div>
-        <script src="/socket.io/socket.io.js"></script>
-        <script>
-              const app = new Vue({
-                el: '#app',
-                data: {
-                    datas : {canClaim1: true, canClaim2:true}
-                }
-              })
-            //SocketIO Connect
-            var socket = io.connect('http://127.0.0.1:8080');
-            //Claim a Player to server
-            function ClaimJ(player)
-            {
-                switch(player)
-                {
-                    case 1:
-                        socket.emit('claiming',player);
-                       
-                        break;
-                    case 2:
-                        socket.emit('claiming',player);
-                       
-                        break;
-                    default :
-                        break;
-                }
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var selectedX, selectedY;
+        function Clicked(x, y) {
+            selectedX = x;
+            selectedY = y;
+            socket.emit('whereCanGo', x, y);
+            socket.on('canGoHere', function (drawMap) {
+                app.datas.map = drawMap;
+            });
+            console.log("Clicked on " + x + " ; " + y);
+        }
+
+        function HeyMateGoHere(x, y) {
+            socket.emit('heyMateGoHere', selectedX, selectedY, x, y);
+        }
+
+        const app = new Vue({
+            el: '#app',
+            data: {
+                datas: { canClaim1: true, canClaim2: true , chatlog : "Welcome to the game"}
             }
-            //A player has claimed
-            socket.on('claimed',function(){
-                socket.emit('requestUpdate');
-            });
+        })
+        //SocketIO Connect
+        var socket = io.connect('http://127.0.0.1:8080');
+        //Claim a Player to server
+        function ClaimJ(player) {
+            switch (player) {
+                case 1:
+                    socket.emit('claiming', player);
 
-            //Called when you are completely connected
-            socket.on('Update',function(datas){
-                app.datas = datas;
-            });
+                    break;
+                case 2:
+                    socket.emit('claiming', player);
 
-            //When the server told us to begin positioning
-            socket.on('beginPositioning',function(){
-                //Positioning
+                    break;
+                default:
+                    break;
+            }
+        }
+        //A player has claimed
+        socket.on('claimed', function () {
+            socket.emit('requestUpdate');
+        });
 
-                //Told the server that finished
-                socket.emit('endPositioning',socket.id);
-            });
-        </script>
-    </body>
-</html> 
+//Called when you are completely connected
+socket.on('Update', function (datas) {
+    app.datas = datas;
+});
+
+//Called when you are completely connected
+socket.on('win', function (str) {
+    app.datas.map = "<h1>"+str+"</h1>";
+});
+
+//Called when you are completely connected
+socket.on('chatlog', function (str) {
+    app.datas.chatlog += "\n"+str;
+});
+
+        //When the server told us to begin positioning
+        socket.on('beginPositioning', function () {
+            //Positioning
+
+            //Told the server that finished
+            socket.emit('endPositioning', socket.id);
+        });
+
+        socket.on('turn', function (player) {
+            if (socket.id == player.name) {
+                //Take turn
+                TakeTurn().then(socket.emit('endTurn'));
+            }
+        });
+    </script>
+</body>
+
+</html>

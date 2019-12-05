@@ -12,27 +12,20 @@ module.exports = class Piece {
         }
         Die() {
                 this.isDead = true;
+                this.player.listPieces[this.type.name]--;
         }
         GetColor() {
                 return this.player.color;
         }
-        Draw(myPiece = false) {
+        Draw(selected,myPiece = false, x = 0, y = 0) {
                 var str = "";
                 if (!this.isDead) {
-                        if (this.player.color == "blue") {
-                                str+= '<div class="Piece PlayerBlue ' + (this.player.isRacist ? 'racist' : '') + '">';
-                                if(myPiece){
-                                 str += '<img src="' + this.type.img + '" alt="' + this.type.name + '"/>';
-                                }
-                                str += '</div>'
+                        
+                        str+= '<div class="Piece Player'+(this.player.color == "blue"?"Blue":"Red")+' ' + (this.player.isRacist ? 'racist' : 'notRacist') + ' '+(selected?"selected":"")+'">';
+                        if(myPiece){
+                         str += '<img src="' + this.type.img + '" alt="' + this.type.name + '" onclick="Clicked('+x+','+y+')"/>';
                         }
-                        else {
-                                str+= '<div class="Piece PlayerRed ' + (this.player.isRacist ? 'racist' : '') + '">';
-                                if(myPiece){
-                                 str += '<img src="' + this.type.img + '" alt="' + this.type.name + '"/>';
-                                }
-                                str += '</div>'
-                        }
+                        str += '</div>'
                 }
                 return str;
         }

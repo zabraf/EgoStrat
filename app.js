@@ -42,7 +42,6 @@ app.get('/', function (req, response) {
         response.write(data);
         response.end();
     });
-
 });
 var cpt = 0;
 
@@ -50,13 +49,15 @@ var cpt = 0;
 io.sockets.on('connection', function (client) {
     console.log('Un client est connecté !' + client.id);
     client.on('disconnect', function () {
-        if(ruleController.player1.username == client.id){
+        if (ruleController.player1.username == client.id) {
             ruleController.player1.username = ruleController.p1DefaultUsername;
+            io.sockets.emit('claimed');
         }
-        if(ruleController.player2.username == client.id){
+        if (ruleController.player2.username == client.id) {
             ruleController.player2.username = ruleController.p2DefaultUsername;
+            io.sockets.emit('claimed');
         }
-        if(ruleController.player1.username == ruleController.p1DefaultUsername && ruleController.player2.username == ruleController.p2DefaultUsername){
+        if (ruleController.player1.username == ruleController.p1DefaultUsername && ruleController.player2.username == ruleController.p2DefaultUsername) {
             isSetUp = false;
             ruleController.ResetMap();
             io.sockets.emit('claimed');
@@ -86,21 +87,68 @@ io.sockets.on('connection', function (client) {
         }
     });
 
+
+    client.on('whereCanGo', function (x, y) {
+
+        ruleController.WherePieceCanGo(ruleController.map[x][y]);
+
+        client.emit('canGoHere', ruleController.DrawMap(client.id));
+        ruleController.Unselect();
+    });
+
     client.emit('Update', UpdateMap(client.id));
-    client.on('requestUpdate',function(){
-        client.emit('Update',UpdateMap(client.id));
+    client.on('requestUpdate', function () {
+        client.emit('Update', UpdateMap(client.id));
+    });
+    
+    client.on('heyMateGoHere',function(selectedX,selectedY,x,y){
+        var tileDeparture = ruleController.map[selectedX][selectedY];
+        var tileArrival = ruleController.map[x][y];
+        io.sockets.emit('chatlog',ruleController.MovePiece(tileDeparture,tileArrival));
+        if (turn == ruleController.player1.username){
+            turn = ruleController.player2.username;
+        }else{
+            turn = ruleController.player1.username;
+        }
+
+        if(ruleController.CheckWin(ruleController.player1,ruleController.player2)){
+            io.sockets.emit('win',ruleController.player1.username +" won");
+            ruleController.ResetGame();
+        }else if(ruleController.CheckWin(ruleController.player2,ruleController.player1)){
+            io.sockets.emit('win',ruleController.player2.username +" won");
+            ruleController.ResetGame();
+        }else{
+            io.sockets.emit('claimed');
+        }
     });
 });
 
+var turn;
 
+var hasFinishedPositioning;
 function startGame() {
+    hasFinishedPositioning = 0;
     io.sockets.emit('beginPositioning', piecesToPut);
-    io.sockets.on('endPositioning', function (clientId) {
-        io.sockets.emit('chatLog', clientId + " has finished placing");
-    });
 }
+
+io.sockets.on('endPositioning', function (clientId) {
+    io.sockets.emit('chatLog', clientId + " has finished placing");
+    hasFinishedPositioning++;
+    if (hasFinishedPositioning == 2) {
+        turn = ruleController.player1.username
+        io.sockets.emit('turn', turn);
+    }
+});
+
+
+
+
+/**
+ * Met à jour la carte
+ * @param {string} player nom du joueur 
+ */
 function UpdateMap(player = "none") {
-    if(typeof player == "undefined"){
+    if (typeof player == "undefined") {
         player = "none";
     }
 
@@ -139,6 +187,8 @@ function UpdateMap(player = "none") {
     };
     return datas;
 }
+
+
 
 server.listen(port, hostname);
 
