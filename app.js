@@ -14,6 +14,7 @@ const port = 8080;
 const hostname = "127.0.0.1";
 
 var isSetUp = false;
+var turn = null;
 
 app.get('/img/*', function (req, response) {
     var options = {
@@ -33,6 +34,7 @@ app.get('/img/*', function (req, response) {
     });
 });
 
+
 app.get('/', function (req, response) {
     response.writeHead(200, {
         'Content-Type': 'text/html'
@@ -43,38 +45,43 @@ app.get('/', function (req, response) {
         response.end();
     });
 });
-var cpt = 0;
 
 // Quand un client se connecte, on le note dans la console
 io.sockets.on('connection', function (client) {
-    console.log('Un client est connecté !' + client.id);
     client.on('disconnect', function () {
+        if(turn == client.id)
+        {
+            turn = null;
+        }
         if (ruleController.player1.username == client.id) {
             ruleController.player1.username = ruleController.p1DefaultUsername;
-            io.sockets.emit('claimed');
+            io.sockets.emit('RequestUpdate');
         }
         if (ruleController.player2.username == client.id) {
             ruleController.player2.username = ruleController.p2DefaultUsername;
-            io.sockets.emit('claimed');
+            io.sockets.emit('RequestUpdate');
         }
         if (ruleController.player1.username == ruleController.p1DefaultUsername && ruleController.player2.username == ruleController.p2DefaultUsername) {
             isSetUp = false;
-            ruleController.ResetMap();
-            io.sockets.emit('claimed');
+            ruleController.ResetGame();
+            io.sockets.emit('RequestUpdate');
         }
-        console.log('un client se déconnect !' + client.id);
     });
     client.on('claiming', function (player) {
+        if(turn ==  null)
+        {
+            turn = client.id;
+        }
         switch (player) {
             case 1:
                 if (ruleController.player1.username == ruleController.p1DefaultUsername && ruleController.player2.username != client.id) {
-                    io.sockets.emit('claimed', player, client.id);
+                    io.sockets.emit('RequestUpdate', player, client.id);
                     ruleController.player1.username = client.id;
                 }
                 break;
             case 2:
                 if (ruleController.player2.username == ruleController.p2DefaultUsername && ruleController.player1.username != client.id) {
-                    io.sockets.emit('claimed', player, client.id);
+                    io.sockets.emit('RequestUpdate', player, client.id);
                     ruleController.player2.username = client.id;
                 }
                 break;
@@ -82,35 +89,52 @@ io.sockets.on('connection', function (client) {
                 break;
         }
         if (!isSetUp && ruleController.player1.username != ruleController.p1DefaultUsername && ruleController.player2.username != ruleController.p2DefaultUsername) {
-            ruleController.SetupPlayer();
+
             isSetUp = true;
+           startGame();
         }
     });
 
 
     client.on('whereCanGo', function (x, y) {
+        if(turn == client.id){
+            ruleController.WherePieceCanGo(ruleController.map[x][y]);    
+            client.emit('redrawMap', ruleController.DrawMap(client.id));
+            ruleController.Unselect();
+        }
+    });
 
-        ruleController.WherePieceCanGo(ruleController.map[x][y]);
-
-        client.emit('canGoHere', ruleController.DrawMap(client.id));
-        ruleController.Unselect();
+    client.on('switch',function(x1,y1,x2,y2){
+        var tmp = ruleController.map[x1,y1].piece;
+        ruleController.map[x1,y1].piece = ruleController.map[x2,y2].piece;
+        ruleController.map[x2,y2].piece = tmp;
+        client.emit('redrawMap',ruleController.DrawMap(client.id));
     });
 
     client.emit('Update', UpdateMap(client.id));
-    client.on('requestUpdate', function () {
+
+    client.on('WantUpdate', function () {
         client.emit('Update', UpdateMap(client.id));
     });
     
     client.on('heyMateGoHere',function(selectedX,selectedY,x,y){
         var tileDeparture = ruleController.map[selectedX][selectedY];
         var tileArrival = ruleController.map[x][y];
-        io.sockets.emit('chatlog',ruleController.MovePiece(tileDeparture,tileArrival));
+
+        //Launch chatlog for move
+        var logMove = ruleController.MovePiece(tileDeparture,tileArrival);
+        if(logMove != null){
+            io.sockets.emit('chatlog',logMove);
+        }
+
+        //Change turn
         if (turn == ruleController.player1.username){
             turn = ruleController.player2.username;
         }else{
             turn = ruleController.player1.username;
         }
 
+        //
         if(ruleController.CheckWin(ruleController.player1,ruleController.player2)){
             io.sockets.emit('win',ruleController.player1.username +" won");
             ruleController.ResetGame();
@@ -118,17 +142,17 @@ io.sockets.on('connection', function (client) {
             io.sockets.emit('win',ruleController.player2.username +" won");
             ruleController.ResetGame();
         }else{
-            io.sockets.emit('claimed');
+            io.sockets.emit('RequestUpdate');
         }
     });
 });
 
-var turn;
 
 var hasFinishedPositioning;
 function startGame() {
+    ruleController.SetupPlayer();
     hasFinishedPositioning = 0;
-    io.sockets.emit('beginPositioning', piecesToPut);
+    io.sockets.emit('beginPositioning');
 }
 
 io.sockets.on('endPositioning', function (clientId) {
@@ -136,12 +160,9 @@ io.sockets.on('endPositioning', function (clientId) {
     hasFinishedPositioning++;
     if (hasFinishedPositioning == 2) {
         turn = ruleController.player1.username
-        io.sockets.emit('turn', turn);
+        io.sockets.emit('turn', turn.username);
     }
 });
-
-
-
 
 /**
  * Met à jour la carte
@@ -184,6 +205,7 @@ function UpdateMap(player = "none") {
         'FLAG2': ruleController.player2.listPieces['FLAG'],
         'BOMB2': ruleController.player2.listPieces['BOMB'],
         'canClaim2': ruleController.player2.username == ruleController.p2DefaultUsername,
+        'turn' :  turn,
     };
     return datas;
 }

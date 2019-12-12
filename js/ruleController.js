@@ -62,8 +62,8 @@ class RuleController {
         this.ResetGame();
     }
     ResetGame() {
-        this.player1 = new Player(this.p1DefaultUsername, color.RED, this, this.defaultListOfPieces);
-        this.player2 = new Player(this.p2DefaultUsername, color.BLUE, this, this.defaultListOfPieces);
+        this.player1 = new Player(this.p1DefaultUsername, color.RED, this, DEFAULT_SET);
+        this.player2 = new Player(this.p2DefaultUsername, color.BLUE, this, DEFAULT_SET);
         this.ResetMap();
     }
     ResetMap() {
@@ -101,17 +101,31 @@ class RuleController {
             if (tileArrival.piece.player === tileDeparture.piece.player) {
                 throw new Exception("Oh nooooooon");
             } else {
+                var Pie1 = tileDeparture.piece;
+                var Pie2 = tileArrival.piece;
                 tileArrival.piece = this.Fight(tileDeparture.piece, tileArrival.piece);
+                var str = (tileArrival.piece == null ? "nobody" : tileArrival.piece.player.username) + " won the fight";
+                if(tileArrival.piece == null){
+                    str = "nobody won the fight it was a draw between two " + tileDeparture.piece.GetType().name;
+                }else{
+                    var Looser 
+                    if(Pie1.isDead)
+                    {
+                        Looser = Pie1.GetType().name;
+                    }
+                    else
+                    {
+                        Looser = Pie2.GetType().name;
+                    }
+                    str = tileArrival.piece.player.username + " won the fight won with a "+tileArrival.piece.GetType().name + " against a " + Looser;
+                }
                 tileDeparture.piece = null;
-                var str = (tileArrival.piece == null ? "nobody" : tileArrival.piece.player) + " won the fight";
                 return str;
             }
         } else {
 
             tileArrival.piece = tileDeparture.piece;
             tileDeparture.piece = null;
-            var str = tileArrival.piece.player.username + " moved a piece";
-            return str;
         }
 
     }
@@ -122,7 +136,6 @@ class RuleController {
      */
     Fight(piece1, piece2) {
         var result = piece1;
-
         //Compare the strengths
         if (piece2.GetType().strength > piece1.GetType().strength) {
             result = piece2;
@@ -133,7 +146,6 @@ class RuleController {
             }
         } else {
             result = null;
-
             piece1.Die();
             piece2.Die();
 
@@ -221,12 +233,12 @@ class RuleController {
 
                 canGoRightX = (tileDeparture.piece.GetType() == type.SCOUT);
 
-                if (this.map[x][Y].GetPiece() == null || this.map[x][Y].GetPiece().player != tileDeparture.GetPiece().player) {
+                if ((this.map[x][Y].GetPiece() == null || this.map[x][Y].GetPiece().player != tileDeparture.GetPiece().player) &&  this.map[x][Y].canGo) {
                     this.map[x][Y].selected = true;
                 } else {
                     canGoRightX = false;
                 }
-                if (this.map[x][Y].GetPiece() != null && this.map[x][Y].GetPiece().player != tileDeparture.GetPiece().player) {
+                if (this.map[x][Y].GetPiece() != null && this.map[x][Y].GetPiece().player != tileDeparture.GetPiece().player || !this.map[x][Y].canGo ) {
                     canGoRightX = false;
                 }
             }
@@ -235,12 +247,12 @@ class RuleController {
 
                 canGoLeftX = (tileDeparture.piece.GetType() == type.SCOUT);
 
-                if (this.map[x][Y].GetPiece() == null || this.map[x][Y].GetPiece().player != tileDeparture.GetPiece().player) {
+                if ((this.map[x][Y].GetPiece() == null || this.map[x][Y].GetPiece().player != tileDeparture.GetPiece().player) && this.map[x][Y].canGo) {
                     this.map[x][Y].selected = true;
                 } else {
                     canGoLeftX = false;
                 }
-                if (this.map[x][Y].GetPiece() != null && this.map[x][Y].GetPiece().player != tileDeparture.GetPiece().player) {
+                if (this.map[x][Y].GetPiece() != null && this.map[x][Y].GetPiece().player != tileDeparture.GetPiece().player  || !this.map[x][Y].canGo) {
                     canGoLeftX = false;
                 }
             }
@@ -248,12 +260,12 @@ class RuleController {
 
                 canGoBotY = (tileDeparture.piece.GetType() == type.SCOUT);
 
-                if (this.map[X][y].GetPiece() == null || this.map[X][y].GetPiece().player != tileDeparture.GetPiece().player) {
+                if ((this.map[X][y].GetPiece() == null || this.map[X][y].GetPiece().player != tileDeparture.GetPiece().player) && this.map[X][y].canGo) {
                     this.map[X][y].selected = true;
                 } else {
                     canGoBotY = false;
                 }
-                if (this.map[X][y].GetPiece() != null && this.map[X][y].GetPiece().player != tileDeparture.GetPiece().player) {
+                if (this.map[X][y].GetPiece() != null && this.map[X][y].GetPiece().player != tileDeparture.GetPiece().player  || !this.map[X][y].canGo) {
                     canGoBotY = false;
                 }
             }
@@ -262,12 +274,12 @@ class RuleController {
 
                 canGoTopY = (tileDeparture.piece.GetType() == type.SCOUT);
 
-                if (this.map[X][y].GetPiece() == null || this.map[X][y].GetPiece().player != tileDeparture.GetPiece().player) {
+                if ((this.map[X][y].GetPiece() == null || this.map[X][y].GetPiece().player != tileDeparture.GetPiece().player) && this.map[X][y].canGo) {
                     this.map[X][y].selected = true;
                 } else {
                     canGoTopY = false;
                 }
-                if (this.map[X][y].GetPiece() != null && this.map[X][y].GetPiece().player != tileDeparture.GetPiece().player) {
+                if (this.map[X][y].GetPiece() != null && this.map[X][y].GetPiece().player != tileDeparture.GetPiece().player || !this.map[X][y].canGo) {
                     canGoTopY = false;
                 }
             }

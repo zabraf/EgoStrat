@@ -6,7 +6,7 @@ module.exports = class Player {
                 this.color = aColor;
                 this.username = anUsername;
                 this.isAlive = true;
-                this.listPieces = aListOfPieces
+                this.listPieces = {...aListOfPieces}
                 this.ruleControlleur = ruleControlleur;
         }
         HasFlag(){
@@ -33,6 +33,7 @@ module.exports = class Player {
         }
         PutPieces(TileCanHere) {
                 var arrayPieces = [];
+                //Rajoute les pièces
                 for (var key in this.listPieces) {
                         for (var i = 0; i < this.listPieces[key]; i++) {
                                 var pieceType;
@@ -78,16 +79,18 @@ module.exports = class Player {
                         }
                 }
                 
-                
+                //Place les pieces dans la zone donnée
                 for (var x = 0; x < TileCanHere.length; x++) {
 
                         for (var y = 0; y < TileCanHere[0].length; y++) {
+                                TileCanHere[x][y].SetPiece(arrayPieces[(TileCanHere[0].length * x) + y]);
+                                /* Random version
                                 if(arrayPieces.length > 0){
                                         var p = arrayPieces[Math.floor(Math.random()*arrayPieces.length)];
                                         var i = arrayPieces.indexOf(p);
                                         TileCanHere[x][y].SetPiece(arrayPieces[i]);
                                         arrayPieces.splice(i,1);
-                                }
+                                }*/
                         }
                 }
                 return TileCanHere;
