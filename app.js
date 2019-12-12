@@ -159,6 +159,7 @@ io.sockets.on('connection', function (client) {
 
 
 var hasFinishedPositioning;
+
 function startGame() {
     ruleController.SetupPlayer();
     hasFinishedPositioning = 0;
