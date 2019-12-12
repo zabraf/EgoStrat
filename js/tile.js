@@ -18,12 +18,13 @@ module.exports = class Tile{
     SetPiece(piece) {
         this.piece = piece;
     }
-    DrawTile(player) {
+    DrawTile(player,positioning) {
         var draw = "";
         if (this.canGo) {
-            if(this.selected){
+            if(this.selected && !positioning){
                 draw = '<div class="tile go selected" onclick="HeyMateGoHere('+this.x+','+this.y+')" >';
-            }else{
+            }
+            else{
                 draw = '<div class="tile go">';
             }
            

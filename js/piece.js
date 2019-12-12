@@ -23,7 +23,7 @@ module.exports = class Piece {
                         
                         str+= '<div class="Piece Player'+(this.player.color == "blue"?"Blue":"Red")+' ' + (this.player.isRacist ? 'racist' : 'notRacist') + ' '+(selected?"selected":"")+'">';
                         if(myPiece){
-                         str += '<img src="' + this.type.img + '" alt="' + this.type.name + '" onclick="Clicked('+x+','+y+')"/>';
+                         str += '<img src="' + this.type.img + '" alt="' + this.type.name + '" onclick="Clicked('+x+','+y+',this)"/>';
                         }
                         str += '</div>'
                 }

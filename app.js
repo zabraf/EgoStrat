@@ -46,11 +46,10 @@ app.get('/', function (req, response) {
     });
 });
 
-// Quand un client se connecte, on le note dans la console
+// Quand un client se connecte, il s'est connecté
 io.sockets.on('connection', function (client) {
     client.on('disconnect', function () {
-        if(turn == client.id)
-        {
+        if (turn == client.id) {
             turn = null;
         }
         if (ruleController.player1.username == client.id) {
@@ -68,8 +67,7 @@ io.sockets.on('connection', function (client) {
         }
     });
     client.on('claiming', function (player) {
-        if(turn ==  null)
-        {
+        if (turn == null) {
             turn = client.id;
         }
         switch (player) {
@@ -91,24 +89,29 @@ io.sockets.on('connection', function (client) {
         if (!isSetUp && ruleController.player1.username != ruleController.p1DefaultUsername && ruleController.player2.username != ruleController.p2DefaultUsername) {
 
             isSetUp = true;
-           startGame();
+            startGame();
         }
     });
 
 
     client.on('whereCanGo', function (x, y) {
-        if(turn == client.id){
-            ruleController.WherePieceCanGo(ruleController.map[x][y]);    
+        if (turn == client.id && hasFinishedPositioning >= 2) {
+            ruleController.WherePieceCanGo(ruleController.map[x][y]);
             client.emit('redrawMap', ruleController.DrawMap(client.id));
             ruleController.Unselect();
         }
     });
 
-    client.on('switch',function(x1,y1,x2,y2){
-        var tmp = ruleController.map[x1,y1].piece;
-        ruleController.map[x1,y1].piece = ruleController.map[x2,y2].piece;
-        ruleController.map[x2,y2].piece = tmp;
-        client.emit('redrawMap',ruleController.DrawMap(client.id));
+    client.on('select', function (x, y) {
+        ruleController.map[x][y].selected = true;
+        client.emit('redrawMap', ruleController.DrawMap(client.id, true));
+        ruleController.map[x][y].selected = false;
+    });
+    client.on('switch', function (x1, y1, x2, y2) {
+        var tmp = ruleController.map[x1][y1].piece;
+        ruleController.map[x1][y1].piece = ruleController.map[x2][y2].piece;
+        ruleController.map[x2][y2].piece = tmp;
+        client.emit('redrawMap', ruleController.DrawMap(client.id));
     });
 
     client.emit('Update', UpdateMap(client.id));
@@ -116,34 +119,41 @@ io.sockets.on('connection', function (client) {
     client.on('WantUpdate', function () {
         client.emit('Update', UpdateMap(client.id));
     });
+
+    client.on('heyMateGoHere', function (selectedX, selectedY, x, y) {
+        if(hasFinishedPositioning >= 2){
+            var tileDeparture = ruleController.map[selectedX][selectedY];
+            var tileArrival = ruleController.map[x][y];
     
-    client.on('heyMateGoHere',function(selectedX,selectedY,x,y){
-        var tileDeparture = ruleController.map[selectedX][selectedY];
-        var tileArrival = ruleController.map[x][y];
-
-        //Launch chatlog for move
-        var logMove = ruleController.MovePiece(tileDeparture,tileArrival);
-        if(logMove != null){
-            io.sockets.emit('chatlog',logMove);
+            //Launch chatlog for move
+            var logMove = ruleController.MovePiece(tileDeparture, tileArrival);
+            if (logMove != null) {
+                io.sockets.emit('chatlog', logMove);
+            }
+    
+            //Change turn
+            if (turn == ruleController.player1.username) {
+                turn = ruleController.player2.username;
+            } else {
+                turn = ruleController.player1.username;
+            }
+    
+            //
+            if (ruleController.CheckWin(ruleController.player1, ruleController.player2)) {
+                io.sockets.emit('win', ruleController.player1.username + " won");
+                ruleController.ResetGame();
+            } else if (ruleController.CheckWin(ruleController.player2, ruleController.player1)) {
+                io.sockets.emit('win', ruleController.player2.username + " won");
+                ruleController.ResetGame();
+            } else {
+                io.sockets.emit('RequestUpdate');
+            }
         }
+    });
 
-        //Change turn
-        if (turn == ruleController.player1.username){
-            turn = ruleController.player2.username;
-        }else{
-            turn = ruleController.player1.username;
-        }
-
-        //
-        if(ruleController.CheckWin(ruleController.player1,ruleController.player2)){
-            io.sockets.emit('win',ruleController.player1.username +" won");
-            ruleController.ResetGame();
-        }else if(ruleController.CheckWin(ruleController.player2,ruleController.player1)){
-            io.sockets.emit('win',ruleController.player2.username +" won");
-            ruleController.ResetGame();
-        }else{
-            io.sockets.emit('RequestUpdate');
-        }
+    client.on('endPositioning', function () {
+        io.sockets.emit('chatlog', client.id + " has finished placing");
+        hasFinishedPositioning++;
     });
 });
 
@@ -155,14 +165,6 @@ function startGame() {
     io.sockets.emit('beginPositioning');
 }
 
-io.sockets.on('endPositioning', function (clientId) {
-    io.sockets.emit('chatLog', clientId + " has finished placing");
-    hasFinishedPositioning++;
-    if (hasFinishedPositioning == 2) {
-        turn = ruleController.player1.username
-        io.sockets.emit('turn', turn.username);
-    }
-});
 
 /**
  * Met à jour la carte
@@ -205,7 +207,7 @@ function UpdateMap(player = "none") {
         'FLAG2': ruleController.player2.listPieces['FLAG'],
         'BOMB2': ruleController.player2.listPieces['BOMB'],
         'canClaim2': ruleController.player2.username == ruleController.p2DefaultUsername,
-        'turn' :  turn,
+        'turn': turn,
     };
     return datas;
 }

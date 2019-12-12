@@ -203,12 +203,12 @@ class RuleController {
     /**
      * Draw the entire map
      */
-    DrawMap(player) {
+    DrawMap(player,positioning = false) {
         var drawedMap = "";
         for (var j = 0; j < this.Height; j++) {
             drawedMap += "<div class=\"row\">";
             for (var i = 0; i < this.Width; i++) {
-                drawedMap += this.map[i][j].DrawTile(player);
+                drawedMap += this.map[i][j].DrawTile(player,positioning);
             }
             drawedMap += "</div>";
         }

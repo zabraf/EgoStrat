@@ -20,7 +20,6 @@
             display: inline-block;
         }
 
-
         #chatLog {
             border: 2px solid black;
             min-height: 100px;
@@ -54,11 +53,11 @@
             background-color: palevioletred;
         }
 
-        .PlayerBlue .racist {
+        .PlayerBlue.racist {
             background-color: plum;
         }
 
-        .PlayerRed .racist {
+        .PlayerRed.racist {
             background-color: mediumspringgreen;
         }
 
@@ -79,7 +78,7 @@
             background-color: #75c200;
         }
 
-        .selected {
+        .PlayerBlue.racist.selected,.PlayerRed.racist.selected,.selected {
             background-color: yellow;
         }
 
@@ -227,21 +226,21 @@
         <button v-if="positioning && (datas.username1 == pid || datas.username2 == pid)"
             onclick="btnEndPositiong_click()">End
             Positioning</button>
-            <div v-else-if="positioning">Caca</div>
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var selectedX, selectedY;
-        function Clicked(x, y) {
+        function Clicked(x, y, self) {
             if (app.positioning) {
                 if (selectedX == null || selectedY == null) {
                     selectedX = x;
                     selectedY = y;
+                    socket.emit('select',x,y);
                 } else {
-                    socket.emit('switch', x, y, selectedX, selectedY);
+                        socket.emit('switch', x, y, selectedX, selectedY);
+                        selectedX = null;
+                        selectedY = null;
 
-                    selectedX = null;
-                    selectedY = null;
                 }
             } else {
                 selectedX = x;
@@ -285,7 +284,7 @@
                     break;
             }
         }
-        
+
         socket.on('redrawMap', function (drawMap) {
             app.datas.map = drawMap;
         });
@@ -309,19 +308,21 @@
         //Called when you are completely connected
         socket.on('chatlog', function (str) {
             app.chatlog += '\n' + str;
+            console.log(str);
         });
 
+        app.positioning = false;
         //When the server told us to begin positioning
         socket.on('beginPositioning', function () {
             //Positioning
-            app.positionning = true;
+            app.positioning = true;
             app.pid = socket.id;
         });
 
         function btnEndPositiong_click() {
             app.positioning = false;
             //Told the server that finished
-            socket.emit('endPositioning', socket.id);
+            socket.emit('endPositioning');
         }
     </script>
 </body>

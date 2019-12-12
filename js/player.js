@@ -2,7 +2,7 @@ let Pieces = require('./piece');
 let RuleController = require('./ruleController');
 module.exports = class Player {
         constructor(anUsername, aColor, ruleControlleur, aListOfPieces) {
-                this.isRacist = Math.round(Math.random()*100)>=95;
+                this.isRacist = Math.round(Math.random()*100)>=50;
                 this.color = aColor;
                 this.username = anUsername;
                 this.isAlive = true;
