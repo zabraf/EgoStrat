@@ -174,8 +174,20 @@
                 <td>11</td>
             </tr>
         </table>
+
         <div v-html="datas.map" id="map">
         </div>
+        <div style="display:inline-block" v-if="positioning && (datas.username1 == pid || datas.username2 == pid)">
+            <input type="text" id="newName" placeholder="Change Username"/>
+            <button onclick="socket.emit('changeName',newName.value);">Apply Changes</button>
+        </div>
+        <button v-if="positioning && (datas.username1 == pid || datas.username2 == pid)"
+            onclick="btnEndPositiong_click()">End
+            Positioning</button>
+            <button v-if="!positioning && (datas.username1 == pid || datas.username2 == pid)"
+                onclick="btnSurrend_click()">Surrend</button>
+
+
         <div id="InfoBlock">
             <div id="player2Info">
                 <b v-if="datas.turn == datas.username2">Turn</b>
@@ -223,9 +235,6 @@
                 {{ chatlog }}
             </div>
         </div>
-        <button v-if="positioning && (datas.username1 == pid || datas.username2 == pid)"
-            onclick="btnEndPositiong_click()">End
-            Positioning</button>
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -268,9 +277,19 @@
         })
         //SocketIO Connect
         var socket = io.connect('http://127.0.0.1:8080');
-        app.pid = socket.id;
+
+        socket.on('nameChanged',function(ancientId,newName){
+            selectedY = null;
+            selectedX = null;
+            if(app.pid == ancientId){
+                app.pid = newName;
+            }
+        });
+
         //Claim a Player to server
         function ClaimJ(player) {
+            app.pid = socket.id;
+
             switch (player) {
                 case 1:
                     socket.emit('claiming', player);
@@ -285,6 +304,9 @@
             }
         }
 
+        function btnSurrend_click(){
+            socket.emit('surrend');
+        }
         socket.on('redrawMap', function (drawMap) {
             app.datas.map = drawMap;
         });
@@ -296,7 +318,6 @@
         //Called when you are completely connected
         socket.on('Update', function (datas) {
             app.datas = datas;
-            app.pid = socket.id;
         });
 
         //Called when you are completely connected
@@ -311,7 +332,7 @@
             console.log(str);
         });
 
-        app.positioning = false;
+        app.positioning = true;
         //When the server told us to begin positioning
         socket.on('beginPositioning', function () {
             //Positioning

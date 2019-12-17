@@ -48,6 +48,36 @@ app.get('/', function (req, response) {
 
 // Quand un client se connecte, il s'est connecté
 io.sockets.on('connection', function (client) {
+    client.on('surrend', function () {
+        if (ruleController.player1.username == client.id) {
+            io.sockets.emit('win', ruleController.player2.username + " won");
+        }
+        if (ruleController.player2.username == client.id) {
+            io.sockets.emit('win', ruleController.player1.username + " won");
+        }
+    });
+    client.on('changeName', function (newName) {
+        if (ruleController.player1.username != newName && ruleController.player2.username != newName) {
+
+            if (ruleController.player1.username == client.id) {
+                if (turn == ruleController.player1.username) {
+                    turn = newName;
+                }
+                ruleController.player1.username = newName;
+            }
+            if (ruleController.player2.username == client.id) {
+                if (turn == ruleController.player2.username) {
+                    turn = newName;
+                }
+                ruleController.player2.username = newName;
+            }
+
+            ancientId = client.id;
+            client.id = newName;
+            io.sockets.emit('nameChanged', ancientId, newName);
+            io.sockets.emit('RequestUpdate');
+        }
+    })
     client.on('disconnect', function () {
         if (turn == client.id) {
             turn = null;
@@ -55,10 +85,16 @@ io.sockets.on('connection', function (client) {
         if (ruleController.player1.username == client.id) {
             ruleController.player1.username = ruleController.p1DefaultUsername;
             io.sockets.emit('RequestUpdate');
+            if(hasFinishedPositioning < 2){
+                hasFinishedPositioning++;
+            }
         }
         if (ruleController.player2.username == client.id) {
             ruleController.player2.username = ruleController.p2DefaultUsername;
             io.sockets.emit('RequestUpdate');
+            if(hasFinishedPositioning < 2){
+                hasFinishedPositioning++;
+            }
         }
         if (ruleController.player1.username == ruleController.p1DefaultUsername && ruleController.player2.username == ruleController.p2DefaultUsername) {
             isSetUp = false;
@@ -121,23 +157,23 @@ io.sockets.on('connection', function (client) {
     });
 
     client.on('heyMateGoHere', function (selectedX, selectedY, x, y) {
-        if(hasFinishedPositioning >= 2){
+        if (hasFinishedPositioning >= 2) {
             var tileDeparture = ruleController.map[selectedX][selectedY];
             var tileArrival = ruleController.map[x][y];
-    
+
             //Launch chatlog for move
             var logMove = ruleController.MovePiece(tileDeparture, tileArrival);
             if (logMove != null) {
                 io.sockets.emit('chatlog', logMove);
             }
-    
+
             //Change turn
             if (turn == ruleController.player1.username) {
                 turn = ruleController.player2.username;
             } else {
                 turn = ruleController.player1.username;
             }
-    
+
             //
             if (ruleController.CheckWin(ruleController.player1, ruleController.player2)) {
                 io.sockets.emit('win', ruleController.player1.username + " won");
