@@ -9,9 +9,11 @@ module.exports = class Player {
                 this.listPieces = {...aListOfPieces}
                 this.ruleControlleur = ruleControlleur;
         }
+        //routourne si oui ou non le joueur a un drapeaux
         HasFlag(){
                 return this.listPieces['FLAG'] > 0;
         }
+        //retourne le nombre de pièce qui bouge
         GetNbMovablePieces() {
                 var movablePieces = this.listPieces['CAPTAIN'] +
                         this.listPieces['COLONEL'] +
@@ -25,12 +27,15 @@ module.exports = class Player {
                         this.listPieces['SPY'];
                 return movablePieces;
         }
+        //change le nom de l'utilisateur
         SetUsername(username) {
                 this.username = username;
         }
+        //retourne le nom de l'utilisateur
         GetUsername() {
                 return this.username;
         }
+        //
         PutPieces(TileCanHere) {
                 var arrayPieces = [];
                 //Rajoute les pièces

@@ -107,6 +107,7 @@
 
 <body>
     <div id="app">
+        <div style="display: inline-block;">
         <table id="legend">
             <tr>
                 <th>Piece</th>
@@ -175,17 +176,17 @@
             </tr>
         </table>
 
+        <div v-if="(datas.username1 == pid || datas.username2 == pid)">
+            <input type="text" id="newName" placeholder="Change Username"/>
+            <button onclick="socket.emit('changeName',newName.value);">Apply Changes</button>        
+            <button style="display: block;" v-if="positioning" onclick="btnEndPositiong_click()">End Positioning</button>
+            <button style="display: block;" v-if="!positioning" onclick="btnSurrend_click()">Surrend</button style="display: block;">
+        </div>
+
+    </div>
+
         <div v-html="datas.map" id="map">
         </div>
-        <div style="display:inline-block" v-if="positioning && (datas.username1 == pid || datas.username2 == pid)">
-            <input type="text" id="newName" placeholder="Change Username"/>
-            <button onclick="socket.emit('changeName',newName.value);">Apply Changes</button>
-        </div>
-        <button v-if="positioning && (datas.username1 == pid || datas.username2 == pid)"
-            onclick="btnEndPositiong_click()">End
-            Positioning</button>
-            <button v-if="!positioning && (datas.username1 == pid || datas.username2 == pid)"
-                onclick="btnSurrend_click()">Surrend</button>
 
 
         <div id="InfoBlock">
@@ -239,7 +240,8 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var selectedX, selectedY;
-        function Clicked(x, y, self) {
+        //Fais quelquechose avec les trucs qu'on lui donne
+        function Clicked(x, y) {
             if (app.positioning) {
                 if (selectedX == null || selectedY == null) {
                     selectedX = x;
@@ -258,14 +260,11 @@
             }
         }
 
-
-        function Switch(x1, y1, x2, y2) {
-        }
-
+        //Demande a la piece selectionnée d'aller en x y
         function HeyMateGoHere(x, y) {
             socket.emit('heyMateGoHere', selectedX, selectedY, x, y);
         }
-
+        //Lance VueJS
         const app = new Vue({
             el: '#app',
             data: {
@@ -278,38 +277,41 @@
         //SocketIO Connect
         var socket = io.connect('http://127.0.0.1:8080');
 
+        //Change le nom de quelqu'un
         socket.on('nameChanged',function(ancientId,newName){
             selectedY = null;
             selectedX = null;
             if(app.pid == ancientId){
                 app.pid = newName;
             }
+            socket.emit('WantUpdate');
         });
 
         //Claim a Player to server
         function ClaimJ(player) {
             app.pid = socket.id;
-
             switch (player) {
                 case 1:
                     socket.emit('claiming', player);
-
                     break;
                 case 2:
                     socket.emit('claiming', player);
-
                     break;
                 default:
                     break;
             }
         }
 
+        //Abandonne quand on clique sur le bouton surrend
         function btnSurrend_click(){
             socket.emit('surrend');
         }
+
+        //Redéssine la map
         socket.on('redrawMap', function (drawMap) {
             app.datas.map = drawMap;
         });
+
         //A player has claimed
         socket.on('RequestUpdate', function () {
             socket.emit('WantUpdate');
@@ -339,6 +341,7 @@
             app.positioning = true;
             app.pid = socket.id;
         });
+
 
         function btnEndPositiong_click() {
             app.positioning = false;
