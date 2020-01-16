@@ -15,6 +15,7 @@ const hostname = "127.0.0.1";
 
 var isSetUp = false;
 var turn = null;
+var hasFinishedPositioning = 0;
 
 app.get('/img/*', function (req, response) {
     var options = {
@@ -103,9 +104,7 @@ io.sockets.on('connection', function (client) {
         }
     });
     client.on('claiming', function (player) {
-        if (turn == null) {
-            turn = client.id;
-        }
+        turn = client.id;
         switch (player) {
             case 1:
                 if (ruleController.player1.username == ruleController.p1DefaultUsername && ruleController.player2.username != client.id) {
@@ -160,13 +159,13 @@ io.sockets.on('connection', function (client) {
         if (hasFinishedPositioning >= 2) {
             var tileDeparture = ruleController.map[selectedX][selectedY];
             var tileArrival = ruleController.map[x][y];
-
+            
             //Launch chatlog for move
             var logMove = ruleController.MovePiece(tileDeparture, tileArrival);
             if (logMove != null) {
                 io.sockets.emit('chatlog', logMove);
-            }
-
+            }  
+                     
             //Change turn
             if (turn == ruleController.player1.username) {
                 turn = ruleController.player2.username;
@@ -178,9 +177,13 @@ io.sockets.on('connection', function (client) {
             if (ruleController.CheckWin(ruleController.player1, ruleController.player2)) {
                 io.sockets.emit('win', ruleController.player1.username + " won");
                 ruleController.ResetGame();
+                hasFinishedPositioning=0;
+                isSetUp = false;
             } else if (ruleController.CheckWin(ruleController.player2, ruleController.player1)) {
                 io.sockets.emit('win', ruleController.player2.username + " won");
                 ruleController.ResetGame();
+                hasFinishedPositioning=0;
+                isSetUp = false;
             } else {
                 io.sockets.emit('RequestUpdate');
             }
@@ -194,7 +197,6 @@ io.sockets.on('connection', function (client) {
 });
 
 
-var hasFinishedPositioning;
 
 function startGame() {
     ruleController.SetupPlayer();
@@ -214,6 +216,8 @@ function UpdateMap(player = "none") {
 
     var datas = {
         'map': ruleController.DrawMap(player),
+
+        'defaultSet': ruleController.defaultListOfPieces,
 
         'username1': ruleController.player1.username,
         'MARSHAL1': ruleController.player1.listPieces['MARSHAL'],

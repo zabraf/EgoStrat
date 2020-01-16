@@ -62,6 +62,7 @@ class RuleController {
         this.ResetGame();
     }
     ResetGame() {
+        
         this.player1 = new Player(this.p1DefaultUsername, color.RED, this, DEFAULT_SET);
         this.player2 = new Player(this.p2DefaultUsername, color.BLUE, this, DEFAULT_SET);
         this.ResetMap();
@@ -96,7 +97,14 @@ class RuleController {
      * @param {Tile} tileArrival 
      */
     MovePiece(tileDeparture, tileArrival) {
-
+        this.map.forEach(row => {
+            row.forEach(tile =>{
+                tile.isLastArrival = false;
+                tile.isLastDeparture = false;
+            })
+        });
+        tileDeparture.isLastDeparture = true;
+        tileArrival.isLastArrival = true;
         if (tileArrival.piece != null) {
             if (tileArrival.piece.player === tileDeparture.piece.player) {
                 throw new Exception("Oh nooooooon");

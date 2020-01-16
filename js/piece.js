@@ -17,11 +17,11 @@ module.exports = class Piece {
         GetColor() {
                 return this.player.color;
         }
-        Draw(selected,myPiece = false, x = 0, y = 0) {
+        Draw(isLastArrival,selected,myPiece = false, x = 0, y = 0) {
                 var str = "";
                 if (!this.isDead) {
                         
-                        str+= '<div class="Piece Player'+(this.player.color == "blue"?"Blue":"Red")+' ' + (this.player.isRacist ? 'racist' : 'notRacist') + ' '+(selected?"selected":"")+'">';
+                        str+= '<div class="Piece Player'+(this.player.color == "blue"?"Blue":"Red")+' ' + (this.player.isRacist ? 'racist' : 'notRacist') + ' '+(selected?"selected":"")+' '+(isLastArrival?"lastArr ":" ")+'">';
                         if(myPiece){
                          str += '<img src="' + this.type.img + '" alt="' + this.type.name + '" onclick="Clicked('+x+','+y+',this)"/>';
                         }

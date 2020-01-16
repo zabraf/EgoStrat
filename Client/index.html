@@ -2,9 +2,12 @@
 <html>
 
 <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
     <style>
-        div {
-            vertical-align: top;
+        * {
+            font-family: "Times New Roman", Times, serif
         }
 
         #app {
@@ -15,7 +18,7 @@
         #map,
         #player1Info,
         #player2Info,
-        #legend,
+        #legendImg,
         #InfoBlock {
             display: inline-block;
         }
@@ -38,6 +41,7 @@
         .go {
             background-color: green;
         }
+
 
         .PlayerBlue,
         .PlayerRed {
@@ -78,7 +82,9 @@
             background-color: #75c200;
         }
 
-        .PlayerBlue.racist.selected,.PlayerRed.racist.selected,.selected {
+        .PlayerBlue.racist.selected,
+        .PlayerRed.racist.selected,
+        .selected {
             background-color: yellow;
         }
 
@@ -87,19 +93,28 @@
             height: 100%;
         }
 
-        .legend {
-            width: 20px;
-            height: 20px;
+        .legendImg {
+            height: 100px;
+            width: auto;
         }
 
         table {
             border-collapse: collapse;
+            margin: auto;
         }
 
-        th,
         td {
             border: 1px solid black;
-            padding: 2px;
+        }
+
+        .lastDep {
+            background-image: url('img/blue-cross.png');
+            background-size: 100% 100%;
+        }
+
+        .lastArr {
+            background-image: url('img/red-cross.png');
+            background-size: 100% 100%;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -107,148 +122,232 @@
 
 <body>
     <div id="app">
-        <table id="legend">
-            <tr>
-                <th>Piece</th>
-                <th>Image</th>
-                <th>Puissance</th>
-            </tr>
-            <tr>
-                <td>MARSHAL</td>
-                <td><img src="/img/marshal.svg" class="legend" /></td>
-                <td>10 </td>
-            </tr>
-            <tr>
-                <td>GENERAL</td>
-                <td><img src="/img/general.svg" class="legend" /></td>
-                <td>9</td>
-            </tr>
-            <tr>
-                <td>COLONEL</td>
-                <td><img src="/img/colonel.svg" class="legend" /></td>
-                <td>8</td>
-            </tr>
-            <tr>
-                <td>MAJOR</td>
-                <td><img src="/img/major.svg" class="legend" /></td>
-                <td>7</td>
-            </tr>
-            <tr>
-                <td>CAPTAIN</td>
-                <td><img src="/img/captain.svg" class="legend" /></td>
-                <td>6</td>
-            </tr>
-            <tr>
-                <td>LIEUTENANT</td>
-                <td><img src="/img/lieutenant.svg" class="legend" /></td>
-                <td>5</td>
-            </tr>
-            <tr>
-                <td>SERGEANT</td>
-                <td><img src="/img/sergeant.svg" class="legend" /></td>
-                <td>4</td>
-            </tr>
-            <tr>
-                <td>MINER</td>
-                <td><img src="/img/miner.svg" class="legend" /></td>
-                <td>3</td>
-            </tr>
-            <tr>
-                <td>SCOUT</td>
-                <td><img src="/img/scout.svg" class="legend" /></td>
-                <td>2</td>
-            </tr>
-            <tr>
-                <td>SPY</td>
-                <td><img src="/img/spy.svg" class="legend" /></td>
-                <td>1</td>
-            </tr>
-            <tr>
-                <td>FLAG</td>
-                <td><img src="/img/flag.svg" class="legend" /></td>
-                <td>0</td>
-            </tr>
-            <tr>
-                <td>BOMB</td>
-                <td><img src="/img/bomb.svg" class="legend" /></td>
-                <td>11</td>
-            </tr>
-        </table>
+
 
         <div v-html="datas.map" id="map">
         </div>
-        <div style="display:inline-block" v-if="positioning && (datas.username1 == pid || datas.username2 == pid)">
-            <input type="text" id="newName" placeholder="Change Username"/>
-            <button onclick="socket.emit('changeName',newName.value);">Apply Changes</button>
-        </div>
-        <button v-if="positioning && (datas.username1 == pid || datas.username2 == pid)"
-            onclick="btnEndPositiong_click()">End
-            Positioning</button>
+        <div class="container col-12">
+
+            <div style="display:inline-block" v-if="positioning && (datas.username1 == pid || datas.username2 == pid)">
+                <input type="text" id="newName" placeholder="Change Username" />
+                <button onclick="socket.emit('changeName',newName.value);">Apply Changes</button>
+            </div>
+            <button v-if="positioning && (datas.username1 == pid || datas.username2 == pid)"
+                onclick="btnEndPositiong_click()">End
+                Positioning</button>
             <button v-if="!positioning && (datas.username1 == pid || datas.username2 == pid)"
                 onclick="btnSurrend_click()">Surrend</button>
 
 
-        <div id="InfoBlock">
-            <div id="player2Info">
-                <b v-if="datas.turn == datas.username2">Turn</b>
-                <span v-else>Not turn</span>
-                <div id="name2" v-if="pid == datas.username2"><b>{{ datas.username2 }}</b></div>
-                <div id="name2" v-else>{{ datas.username2 }} </div>
-                <div id="pieces2">
-                    <div id="MARSHAL2">Remaining {{ datas.MARSHAL2 }} MARSHAL</div>
-                    <div id="GENERAL2">Remaining {{ datas.GENERAL2 }} GENERAL</div>
-                    <div id="COLONEL2">Remaining {{ datas.COLONEL2 }} COLONEL</div>
-                    <div id="MAJOR2">Remaining {{ datas.MAJOR2 }} MAJOR</div>
-                    <div id="CAPTAIN2">Remaining {{ datas.CAPTAIN2 }} CAPTAIN</div>
-                    <div id="LIEUTENANT2">Remaining {{ datas.LIEUTENANT2 }} LIEUTENANT</div>
-                    <div id="SERGEANT2">Remaining {{ datas.SERGEANT2 }} SERGEANT</div>
-                    <div id="MINER2">Remaining {{ datas.MINER2 }} MINER</div>
-                    <div id="SCOUT2">Remaining {{ datas.SCOUT2 }} SCOUT</div>
-                    <div id="SPY2">Remaining {{ datas.SPY2 }} SPY</div>
-                    <div id="FLAG2">Remaining {{ datas.FLAG2 }} FLAG</div>
-                    <div id="BOMB2">Remaining {{ datas.BOMB2 }} BOMB</div>
+
+            <table class="col-6">
+                <tr>
+                    <td class="align-middle">Piece</td>
+                    <td class="align-middle">Image</td>
+                    <td class="align-middle">Puissance</td>
+                </tr>
+                <tr>
+                    <td class="align-middle">MARSHAL</td>
+                    <td class="align-middle"><img src="/img/marshal.svg" class="legendImg" /></td>
+                    <td class="align-middle">10 </td>
+                </tr>
+                <tr>
+                    <td class="align-middle">GENERAL</td>
+                    <td class="align-middle"><img src="/img/general.svg" class="legendImg" /></td>
+                    <td class="align-middle">9</td>
+                </tr>
+                <tr>
+                    <td class="align-middle">COLONEL</td>
+                    <td class="align-middle"><img src="/img/colonel.svg" class="legendImg" /></td>
+                    <td class="align-middle">8</td>
+                </tr>
+                <tr>
+                    <td class="align-middle">MAJOR</td>
+                    <td class="align-middle"><img src="/img/major.svg" class="legendImg" /></td>
+                    <td class="align-middle">7</td>
+                </tr>
+                <tr>
+                    <td class="align-middle">CAPTAIN</td>
+                    <td class="align-middle"><img src="/img/captain.svg" class="legendImg" /></td>
+                    <td class="align-middle">6</td>
+                </tr>
+                <tr>
+                    <td class="align-middle">LIEUTENANT</td>
+                    <td class="align-middle"><img src="/img/lieutenant.svg" class="legendImg" /></td>
+                    <td class="align-middle">5</td>
+                </tr>
+                <tr>
+                    <td class="align-middle">SERGEANT</td>
+                    <td class="align-middle"><img src="/img/sergeant.svg" class="legendImg" /></td>
+                    <td class="align-middle">4</td>
+                </tr>
+                <tr>
+                    <td class="align-middle">MINER</td>
+                    <td class="align-middle"><img src="/img/miner.svg" class="legendImg" /></td>
+                    <td class="align-middle">3</td>
+                </tr>
+                <tr>
+                    <td class="align-middle">SCOUT</td>
+                    <td class="align-middle"><img src="/img/scout.svg" class="legendImg" /></td>
+                    <td class="align-middle">2</td>
+                </tr>
+                <tr>
+                    <td class="align-middle">SPY</td>
+                    <td class="align-middle"><img src="/img/spy.svg" class="legendImg" /></td>
+                    <td class="align-middle">1</td>
+                </tr>
+                <tr>
+                    <td class="align-middle">FLAG</td>
+                    <td class="align-middle"><img src="/img/flag.svg" class="legendImg" /></td>
+                    <td class="align-middle">0</td>
+                </tr>
+                <tr>
+                    <td class="align-middle">BOMB</td>
+                    <td class="align-middle"><img src="/img/bomb.svg" class="legendImg" /></td>
+                    <td class="align-middle">11</td>
+                </tr>
+            </table>
+            <div id="InfoBlock" class="col-6">
+                <div id="player2Info" class="col-5">
+                    <b v-if="datas.turn == datas.username2">Turn</b>
+                    <span v-else>Not turn</span>
+                    <div id="name2" v-if="pid == datas.username2"><b>{{ datas.username2 }}</b></div>
+                    <div id="name2" v-else>{{  datas.username2 }}</div>
+                    <div id="pieces2">
+                        <div id="MARSHAL2">Remaining [{{ datas.MARSHAL2 }}/{{ datas.defaultSet.MARSHAL }}] MARSHAL</div>
+                        <div id="GENERAL2">Remaining [{{  datas.GENERAL2 }}/{{  datas.defaultSet.GENERAL }}] GENERAL
+                        </div>
+                        <div id="COLONEL2">Remaining [{{  datas.COLONEL2 }}/{{  datas.defaultSet.COLONEL }}] COLONEL
+                        </div>
+                        <div id="MAJOR2">Remaining [{{  datas.MAJOR2 }}/{{  datas.defaultSet.MAJOR }}] MAJOR</div>
+                        <div id="CAPTAIN2">Remaining [{{  datas.CAPTAIN2 }}/{{  datas.defaultSet.CAPTAIN }}] CAPTAIN
+                        </div>
+                        <div id="LIEUTENANT2">Remaining [{{  datas.LIEUTENANT2 }}/{{  datas.defaultSet.LIEUTENANT }}]
+                            LIEUTENANT</div>
+                        <div id="SERGEANT2">Remaining [{{  datas.SERGEANT2 }}/{{  datas.defaultSet.SERGEANT }}] SERGEANT
+                        </div>
+                        <div id="MINER2">Remaining [{{  datas.MINER2 }}/{{  datas.defaultSet.MINER }}] MINER</div>
+                        <div id="SCOUT2">Remaining [{{  datas.SCOUT2 }}/{{  datas.defaultSet.SCOUT }}] SCOUT</div>
+                        <div id="SPY2">Remaining [{{  datas.SPY2 }}/{{  datas.defaultSet.SPY }}] SPY</div>
+                        <div id="FLAG2">Remaining [{{  datas.FLAG2 }}/{{  datas.defaultSet.FLAG }}] FLAG</div>
+                        <div id="BOMB2">Remaining [{{  datas.BOMB2 }}/{{  datas.defaultSet.BOMB }}] BOMB</div>
+                    </div>
+                    <button id="btnClaim2" v-if="datas.canClaim2" onclick="ClaimJ(2)">Claim P2</button>
                 </div>
-                <button id="btnClaim2" v-if="datas.canClaim2" onclick="ClaimJ(2)">Claim P2</button>
-            </div>
-            <div id="player1Info">
-                <b v-if="datas.turn == datas.username1">Turn</b>
-                <span v-else>Not turn</span>
-                <div id="name1" v-if="pid == datas.username1"><b>{{ datas.username1 }}</b></div>
-                <div id="name1" v-else>{{ datas.username1 }} </div>
-                <div id="pieces1">
-                    <div id="MARSHAL1">Remaining {{ datas.MARSHAL1 }} MARSHAL</div>
-                    <div id="GENERAL1">Remaining {{ datas.GENERAL1 }} GENERAL</div>
-                    <div id="COLONEL1">Remaining {{ datas.COLONEL1 }} COLONEL</div>
-                    <div id="MAJOR1">Remaining {{ datas.MAJOR1 }} MAJOR</div>
-                    <div id="CAPTAIN1">Remaining {{ datas.CAPTAIN1 }} CAPTAIN</div>
-                    <div id="LIEUTENANT1">Remaining {{ datas.LIEUTENANT1 }} LIEUTENANT</div>
-                    <div id="SERGEANT1">Remaining {{ datas.SERGEANT1 }} SERGEANT</div>
-                    <div id="MINER1">Remaining {{ datas.MINER1 }} MINER</div>
-                    <div id="SCOUT1">Remaining {{ datas.SCOUT1 }} SCOUT</div>
-                    <div id="SPY1">Remaining {{ datas.SPY1 }} SPY</div>
-                    <div id="FLAG1">Remaining {{ datas.FLAG1 }} FLAG</div>
-                    <div id="BOMB1">Remaining {{ datas.BOMB1 }} BOMB</div>
+                <div id="player1Info" class="col-5">
+                    <b v-if="datas.turn == datas.username1">Turn</b>
+                    <span v-else>Not turn</span>
+                    <div id="name1" v-if="pid == datas.username1"><b>{{ datas.username1 }}</b></div>
+                    <div id="name1" v-else>{{  datas.username1 }}</div>
+                    <div id="pieces1">
+                        <div id="MARSHAL1">Remaining [{{  datas.MARSHAL1 }}/{{  datas.defaultSet.MARSHAL }}] MARSHAL
+                        </div>
+                        <div id="GENERAL1">Remaining [{{  datas.GENERAL1 }}/{{  datas.defaultSet.GENERAL }}] GENERAL
+                        </div>
+                        <div id="COLONEL1">Remaining [{{  datas.COLONEL1 }}/{{  datas.defaultSet.COLONEL }}] COLONEL
+                        </div>
+                        <div id="MAJOR1">Remaining [{{  datas.MAJOR1 }}/{{  datas.defaultSet.MAJOR }}] MAJOR</div>
+                        <div id="CAPTAIN1">Remaining [{{  datas.CAPTAIN1 }}/{{  datas.defaultSet.CAPTAIN }}] CAPTAIN
+                        </div>
+                        <div id="LIEUTENANT1">Remaining [{{  datas.LIEUTENANT1 }}/{{  datas.defaultSet.LIEUTENANT }}]
+                            LIEUTENANT</div>
+                        <div id="SERGEANT1">Remaining [{{  datas.SERGEANT1 }}/{{  datas.defaultSet.SERGEANT }}] SERGEANT
+                        </div>
+                        <div id="MINER1">Remaining [{{  datas.MINER1 }}/{{  datas.defaultSet.MINER }}] MINER</div>
+                        <div id="SCOUT1">Remaining [{{  datas.SCOUT1 }}/{{  datas.defaultSet.SCOUT }}] SCOUT</div>
+                        <div id="SPY1">Remaining [{{  datas.SPY1 }}/{{  datas.defaultSet.SPY }}] SPY</div>
+                        <div id="FLAG1">Remaining [{{  datas.FLAG1 }}/{{  datas.defaultSet.FLAG }}] FLAG</div>
+                        <div id="BOMB1">Remaining [{{  datas.BOMB1 }}/{{  datas.defaultSet.BOMB }}] BOMB</div>
+                    </div>
+                    <button id="btnClaim1" v-if="datas.canClaim1" onclick="ClaimJ(1)">Claim P1</button>
                 </div>
-                <button id="btnClaim1" v-if="datas.canClaim1" onclick="ClaimJ(1)">Claim P1</button>
-            </div>
-            <div id="chatLog">
-                {{ chatlog }}
+                <div id="chatLog" class="col-12">
+                    {{ chatlog }}
+                </div>
             </div>
         </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var selectedX, selectedY;
+        const app = new Vue({
+            el: '#app',
+            data: {
+                positioning: true,
+                pid: 0,
+                chatlog: "Welcome to the game",
+                datas: { canClaim1: true, canClaim2: true }
+            }
+        });
+
+        //SocketIO Connect
+        var socket = io.connect('http://127.0.0.1:8080');
+
+        socket.on('redrawMap', function (drawMap) {
+            app.datas.map = drawMap;
+        });
+        //A player has claimed
+        socket.on('RequestUpdate', function () {
+            socket.emit('WantUpdate');
+        });
+
+        //Called when you are completely connected
+        socket.on('Update', function (datas) {
+            app.datas = datas;
+        });
+
+        //Called when you are completely connected
+        socket.on('win', function (str) {
+            Refresh(str);
+            if (app.datas.username1 == app.pid) {
+                ClaimJ(1);
+            } else if (app.datas.username2 == app.pid) {
+                ClaimJ(2);
+            }
+        });
+
+        //Called when you are completely connected
+        socket.on('chatlog', function (str) {
+            app.chatlog += '\n' + str;
+            setTimeout(function () { chatLog.scrollTop = chatLog.scrollHeight }, 10);
+
+        });
+
+        //When the server told us to begin positioning
+        socket.on('beginPositioning', function () {
+            //Positioning
+            app.positioning = true;
+            app.pid = socket.id;
+        });
+
+        socket.on('nameChanged', function (ancientId, newName) {
+            selectedY = null;
+            selectedX = null;
+            if (app.pid == ancientId) {
+                app.pid = newName;
+            }
+        });
+
+        Refresh();
+
+        function Refresh(message = "Welcome to the game") {
+            selectedX = null;
+            selectedY = null;
+            app.positioning = true;
+            app.chatlog = message;
+            socket.emit('WantUpdate');
+        }
+
         function Clicked(x, y, self) {
             if (app.positioning) {
                 if (selectedX == null || selectedY == null) {
                     selectedX = x;
                     selectedY = y;
-                    socket.emit('select',x,y);
+                    socket.emit('select', x, y);
                 } else {
-                        socket.emit('switch', x, y, selectedX, selectedY);
-                        selectedX = null;
-                        selectedY = null;
+                    socket.emit('switch', x, y, selectedX, selectedY);
+                    selectedX = null;
+                    selectedY = null;
 
                 }
             } else {
@@ -258,33 +357,9 @@
             }
         }
 
-
-        function Switch(x1, y1, x2, y2) {
-        }
-
         function HeyMateGoHere(x, y) {
             socket.emit('heyMateGoHere', selectedX, selectedY, x, y);
         }
-
-        const app = new Vue({
-            el: '#app',
-            data: {
-                positioning: true,
-                pid: 0,
-                chatlog: "Welcome to the game",
-                datas: { canClaim1: true, canClaim2: true }
-            }
-        })
-        //SocketIO Connect
-        var socket = io.connect('http://127.0.0.1:8080');
-
-        socket.on('nameChanged',function(ancientId,newName){
-            selectedY = null;
-            selectedX = null;
-            if(app.pid == ancientId){
-                app.pid = newName;
-            }
-        });
 
         //Claim a Player to server
         function ClaimJ(player) {
@@ -304,41 +379,10 @@
             }
         }
 
-        function btnSurrend_click(){
+        function btnSurrend_click() {
             socket.emit('surrend');
         }
-        socket.on('redrawMap', function (drawMap) {
-            app.datas.map = drawMap;
-        });
-        //A player has claimed
-        socket.on('RequestUpdate', function () {
-            socket.emit('WantUpdate');
-        });
 
-        //Called when you are completely connected
-        socket.on('Update', function (datas) {
-            app.datas = datas;
-        });
-
-        //Called when you are completely connected
-        socket.on('win', function (str) {
-            app.datas.map = "<h1>" + str + "</h1>";
-            app.chatlog = "Ah ouaiis!";
-        });
-
-        //Called when you are completely connected
-        socket.on('chatlog', function (str) {
-            app.chatlog += '\n' + str;
-            console.log(str);
-        });
-
-        app.positioning = true;
-        //When the server told us to begin positioning
-        socket.on('beginPositioning', function () {
-            //Positioning
-            app.positioning = true;
-            app.pid = socket.id;
-        });
 
         function btnEndPositiong_click() {
             app.positioning = false;
@@ -346,6 +390,15 @@
             socket.emit('endPositioning');
         }
     </script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
 </body>
 
 </html>
