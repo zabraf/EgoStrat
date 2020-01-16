@@ -1,31 +1,33 @@
-let RuleController = require('./js/ruleController');
-
-const app = require('express')();
-
-let server = require('http').Server(app);
-// Chargement de socket.io
-var io = require('socket.io')(server);
-
-let fs = require('fs');
-
-var ruleController = new RuleController();
 
 const port = 8080;
 const hostname = "127.0.0.1";
 
+//Inclusion des fichiers externes
+let RuleController = require('./js/ruleController');
+const app = require('express')();
+let server = require('http').Server(app);
+var io = require('socket.io')(server);
+let fs = require('fs');
+
+//Création des variables
+var ruleController = new RuleController();
 var isSetUp = false;
+var hasFinishedPositioning;
 var turn = null;
 var hasFinishedPositioning = 0;
 
+//Chemin pour les images
 app.get('/img/*', function (req, response) {
+    //Défini les options
     var options = {
-        root: __dirname + '\\Client\\',
+        root: __dirname + '/Client/',
         dotfiles: 'deny',
         headers: {
             'x-timestamp': Date.now(),
             'x-sent': true
         }
     };
+    //Renvoi l'image ou une erreur
     fs.exists('./Client' + req.path, function (exists) {
         if (exists) {
             response.sendFile(req.path, options);
@@ -35,8 +37,9 @@ app.get('/img/*', function (req, response) {
     });
 });
 
-
+//Chemin pour le jeu de base
 app.get('/', function (req, response) {
+    //Le serveur renvoi le contenu de index.html
     response.writeHead(200, {
         'Content-Type': 'text/html'
     });
@@ -50,6 +53,7 @@ app.get('/', function (req, response) {
 // Quand un client se connecte, il s'est connecté
 io.sockets.on('connection', function (client) {
     client.on('surrend', function () {
+        //Défini qui gagne si on se rend
         if (ruleController.player1.username == client.id) {
             io.sockets.emit('win', ruleController.player2.username + " won");
         }
@@ -58,8 +62,9 @@ io.sockets.on('connection', function (client) {
         }
     });
     client.on('changeName', function (newName) {
+        //Empêche de prendre un nom déjà existant
         if (ruleController.player1.username != newName && ruleController.player2.username != newName) {
-
+            //Vérifie le nom du client et lui donne ce nom
             if (ruleController.player1.username == client.id) {
                 if (turn == ruleController.player1.username) {
                     turn = newName;
@@ -72,13 +77,13 @@ io.sockets.on('connection', function (client) {
                 }
                 ruleController.player2.username = newName;
             }
-
+            
             ancientId = client.id;
             client.id = newName;
             io.sockets.emit('nameChanged', ancientId, newName);
-            io.sockets.emit('RequestUpdate');
         }
     })
+    // Permet de changer les variables lorsque l'utilisateur se deconnecte
     client.on('disconnect', function () {
         if (turn == client.id) {
             turn = null;
@@ -97,12 +102,14 @@ io.sockets.on('connection', function (client) {
                 hasFinishedPositioning++;
             }
         }
+        //Reset game if both player disconnected
         if (ruleController.player1.username == ruleController.p1DefaultUsername && ruleController.player2.username == ruleController.p2DefaultUsername) {
             isSetUp = false;
             ruleController.ResetGame();
             io.sockets.emit('RequestUpdate');
         }
     });
+    
     client.on('claiming', function (player) {
         turn = client.id;
         switch (player) {
@@ -121,6 +128,7 @@ io.sockets.on('connection', function (client) {
             default:
                 break;
         }
+        //Démarre le jeu si nécessaire
         if (!isSetUp && ruleController.player1.username != ruleController.p1DefaultUsername && ruleController.player2.username != ruleController.p2DefaultUsername) {
 
             isSetUp = true;
@@ -128,7 +136,7 @@ io.sockets.on('connection', function (client) {
         }
     });
 
-
+    //Envoi les positions ou la piece en x y peut aller
     client.on('whereCanGo', function (x, y) {
         if (turn == client.id && hasFinishedPositioning >= 2) {
             ruleController.WherePieceCanGo(ruleController.map[x][y]);
@@ -137,25 +145,30 @@ io.sockets.on('connection', function (client) {
         }
     });
 
+    // permet de changer une tile en mode "selectionner"
     client.on('select', function (x, y) {
         ruleController.map[x][y].selected = true;
         client.emit('redrawMap', ruleController.DrawMap(client.id, true));
         ruleController.map[x][y].selected = false;
     });
+
+    //Inverse deux pièces pendant le placement
     client.on('switch', function (x1, y1, x2, y2) {
         var tmp = ruleController.map[x1][y1].piece;
         ruleController.map[x1][y1].piece = ruleController.map[x2][y2].piece;
         ruleController.map[x2][y2].piece = tmp;
         client.emit('redrawMap', ruleController.DrawMap(client.id));
     });
-
+    //Met à jour
     client.emit('Update', UpdateMap(client.id));
-
+    // Recupere la demande de mise à jour et met à jours
     client.on('WantUpdate', function () {
         client.emit('Update', UpdateMap(client.id));
     });
 
+    //Fait un déplacement
     client.on('heyMateGoHere', function (selectedX, selectedY, x, y) {
+        //Vérifie si c'est pendant le positionnement
         if (hasFinishedPositioning >= 2) {
             var tileDeparture = ruleController.map[selectedX][selectedY];
             var tileArrival = ruleController.map[x][y];
@@ -189,15 +202,14 @@ io.sockets.on('connection', function (client) {
             }
         }
     });
-
+    //affiche le message expliquant qu'un utililisateur à fini de positionner ses pièces
     client.on('endPositioning', function () {
         io.sockets.emit('chatlog', client.id + " has finished placing");
         hasFinishedPositioning++;
     });
 });
 
-
-
+//Routine de début de jeu
 function startGame() {
     ruleController.SetupPlayer();
     hasFinishedPositioning = 0;
@@ -248,13 +260,13 @@ function UpdateMap(player = "none") {
         'FLAG2': ruleController.player2.listPieces['FLAG'],
         'BOMB2': ruleController.player2.listPieces['BOMB'],
         'canClaim2': ruleController.player2.username == ruleController.p2DefaultUsername,
+        
         'turn': turn,
     };
     return datas;
 }
 
-
-
+//Lance le serveur
 server.listen(port, hostname);
 
 

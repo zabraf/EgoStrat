@@ -339,6 +339,8 @@
         }
 
         function Clicked(x, y, self) {
+        //Fais quelquechose avec les trucs qu'on lui donne
+        function Clicked(x, y) {
             if (app.positioning) {
                 if (selectedX == null || selectedY == null) {
                     selectedX = x;
@@ -356,7 +358,7 @@
                 socket.emit('whereCanGo', x, y);
             }
         }
-
+//Demande a la piece selectionnée d'aller en x y
         function HeyMateGoHere(x, y) {
             socket.emit('heyMateGoHere', selectedX, selectedY, x, y);
         }
@@ -364,24 +366,22 @@
         //Claim a Player to server
         function ClaimJ(player) {
             app.pid = socket.id;
-
             switch (player) {
                 case 1:
                     socket.emit('claiming', player);
-
                     break;
                 case 2:
                     socket.emit('claiming', player);
-
                     break;
                 default:
                     break;
             }
         }
-
+//Abandonne quand on clique sur le bouton surrend
         function btnSurrend_click() {
             socket.emit('surrend');
         }
+
 
 
         function btnEndPositiong_click() {
