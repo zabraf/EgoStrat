@@ -1,6 +1,8 @@
 
-const port = 8080;
-const hostname = "127.0.0.1";
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 8000;
+}
 
 //Inclusion des fichiers externes
 let RuleController = require('./js/ruleController');
@@ -267,6 +269,6 @@ function UpdateMap(player = "none") {
 }
 
 //Lance le serveur
-server.listen(port, hostname);
+server.listen(port);
 
 
