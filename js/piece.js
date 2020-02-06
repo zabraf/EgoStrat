@@ -22,7 +22,7 @@ module.exports = class Piece {
                 return this.player.color;
         }
         //dessine la pièce
-        Draw(selected,myPiece = false, x = 0, y = 0) {
+        Draw(isLastArrival,selected,myPiece = false, x = 0, y = 0) {
                 var str = "";
                 if (!this.isDead) {
                         

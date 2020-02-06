@@ -294,6 +294,7 @@
         //Called when you are completely connected
         socket.on('Update', function (datas) {
             app.datas = datas;
+            console.log(datas);
         });
 
         //Called when you are completely connected
@@ -325,6 +326,11 @@
             selectedX = null;
             if (app.pid == ancientId) {
                 app.pid = newName;
+            }
+            if(app.datas.username1 == ancientId){
+                app.datas.username1 = newName;
+            }else{
+                app.datas.username2 = newName;
             }
         });
 
