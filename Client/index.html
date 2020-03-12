@@ -281,7 +281,7 @@
         });
 
         //SocketIO Connect
-        var socket = io.connect('https://egostrat.herokuapp.com');
+        var socket = io.connect('https://egostrat.herokuapp.com:8080');
 
         socket.on('redrawMap', function (drawMap) {
             app.datas.map = drawMap;
